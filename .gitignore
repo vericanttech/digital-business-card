@@ -25,6 +25,10 @@ wheels/
 venv/
 ENV/
 
+migrations/__pycache__/
+migrations/versions/__pycache__/
+*.pyc
+
 # Add this to .gitignore
 .env
 

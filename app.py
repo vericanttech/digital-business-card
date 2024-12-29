@@ -6,8 +6,10 @@ from io import BytesIO
 import base64
 import os
 from models.user import db, Admin, BusinessCard  # Remove User from import
+from flask_migrate import Migrate
 
 from dotenv import load_dotenv
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -17,11 +19,24 @@ app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.utcnow()}
+
+
 # Initialize Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 db.init_app(app)
+
+migrate = Migrate(app, db)
+
+
+@app.context_processor
+def inject_user():
+    return dict(current_user=current_user)
 
 
 @login_manager.user_loader
@@ -38,8 +53,6 @@ def create_tables():
         admin.set_password('admin')  # Change this password!
         db.session.add(admin)
         db.session.commit()
-
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -75,8 +88,6 @@ def dashboard():
     return render_template('dashboard.html', cards=cards)
 
 
-
-
 @app.route('/create_card', methods=['GET', 'POST'])
 def create_card():
     if request.method == 'POST':
@@ -92,13 +103,8 @@ def create_card():
                 photo_path = f"photos/{filename}"
                 photo.save(f"static/{photo_path}")
 
-            # Get location data
+            # Get location link directly from the form
             location = request.form.get('location', '')
-            if not location:
-                lat = request.form.get('latitude')
-                lng = request.form.get('longitude')
-                if lat and lng:
-                    location = f"{lat}, {lng}"
 
             # Create new user
             new_user = BusinessCard(
@@ -106,7 +112,7 @@ def create_card():
                 title=request.form['title'],
                 phone=request.form['phone'],
                 email=request.form['email'],
-                location=location,
+                location=location,  # This is now the Google Maps link
                 photo_path=photo_path,
                 instagram=request.form.get('instagram'),
                 whatsapp=request.form.get('whatsapp'),
@@ -129,7 +135,6 @@ def create_card():
             qr_img.save(buffered)
             qr_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-            # Return JSON response for AJAX handling
             return jsonify({
                 'success': True,
                 'qr_code': qr_base64,
@@ -227,4 +232,4 @@ def view_card(unique_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

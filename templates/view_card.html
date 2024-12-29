@@ -6,7 +6,7 @@
         <div class="lg:col-span-2">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <!-- Profile Header -->
-                <div class="relative h-32 bg-gradient-to-r from-blue-500 to-blue-600">
+                <div class="relative h-32 bg-gradient-to-r from-[#F15A22] to-[#F15A22]/80">
                     <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
                         {% if user.photo_path %}
                         <img src="{{ url_for('static', filename=user.photo_path) }}"
@@ -30,7 +30,7 @@
                     <!-- Contact Information -->
                     <div class="mt-6 space-y-4">
                         <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
-                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#F15A22]/10 text-[#F15A22]">
                                 <i class="fas fa-phone"></i>
                             </div>
                             <a href="tel:{{ user.phone }}" class="ml-3 text-gray-700 hover:text-blue-600 transition">
@@ -39,7 +39,7 @@
                         </div>
 
                         <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
-                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#F15A22]/10 text-[#F15A22]">
                                 <i class="fas fa-envelope"></i>
                             </div>
                             <a href="mailto:{{ user.email }}" class="ml-3 text-gray-700 hover:text-blue-600 transition">
@@ -48,7 +48,7 @@
                         </div>
 
                         <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
-                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#F15A22]/10 text-[#F15A22]">
                                 <i class="fas fa-map-marker-alt"></i>
                             </div>
                             <span class="ml-3 text-gray-700">{{ user.location }}</span>
@@ -90,7 +90,13 @@
 
                     <!-- Map -->
                     <div class="mt-6">
-                        <div id="map" class="h-40 rounded-lg overflow-hidden shadow-sm"></div>
+                        <a href="{{ user.location }}" target="_blank"
+                           class="w-full flex items-center justify-center px-4 py-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition duration-200">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#F15A22]/10 text-[#F15A22] mr-3">
+                                <i class="fas fa-directions"></i>
+                            </div>
+                            <span class="text-blue-600 font-medium">Navigate to Location</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -100,20 +106,57 @@
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl shadow-lg p-6">
                 <div class="text-center">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Share Business Card</h2>
-                    <div id="qrcode" class="flex justify-center mb-4">
-                        <!-- QR Code will be generated here -->
+                    <!-- Logo placement at the top of vCard section -->
+                    <div class="mb-2">
+                        <img src="{{ url_for('static', filename='images/logo.svg') }}"
+                             alt="QR Pro Creator"
+                             class="h-8 mx-auto">
                     </div>
-                    <div class="space-y-4">
-                        <button onclick="printQRCode()" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            <i class="fas fa-print mr-2"></i>
-                            Print QR Code
-                        </button>
-                        <button onclick="downloadVCard()" class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                            <i class="fas fa-download mr-2"></i>
-                            Download vCard
-                        </button>
-                    </div>
+
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                        <!-- Admin View with QR Code -->
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Partager la Carte</h2>
+                        <div class="flex flex-col items-center justify-center mb-6">
+                            <div id="qrcode" class="mb-2"></div>
+                            <p class="text-base font-medium text-gray-900 mt-2">{{ user.name }}</p>
+                            <p class="text-sm text-gray-500">{{ user.title }}</p>
+                        </div>
+                        <div class="space-y-3">
+                            <button onclick="handlePrintQR()"
+                                    class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <i class="fas fa-print mr-2"></i>
+                                Imprimer le QR Code
+                            </button>
+                    {% else %}
+                        <!-- User-friendly save contact message -->
+                        <div class="mb-6">
+                            <div class="w-16 h-16 mx-auto bg-[#F15A22]/10 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-address-card text-[#F15A22] text-2xl"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-2">Enregistrer le Contact</h2>
+                            <p class="text-gray-600 mb-4">
+                                Téléchargez les coordonnées de {{ user.name }} directement dans votre répertoire en un clic.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <!-- vCard Download Button -->
+                    <button onclick="handleVCardDownload()"
+                            class="w-full flex flex-col items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-[#F15A22] hover:opacity-90 transition-colors duration-200">
+                        <i class="fas fa-download text-xl mb-1"></i>
+                        <span>Enregistrer dans les Contacts</span>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <i class="fab fa-apple"></i>
+                            <span class="text-xs opacity-90">&</span>
+                            <i class="fab fa-android"></i>
+                        </div>
+                    </button>
+
+                    {% if not current_user.is_authenticated %}
+                    <p class="text-xs text-gray-500 mt-3">
+                        Cette action créera une fiche contact complète avec toutes les coordonnées, liens sociaux et informations de localisation.
+                    </p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -122,87 +165,152 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-// Generate QR Code
-window.onload = function() {
-    new QRCode(document.getElementById("qrcode"), {
-        text: window.location.href,
-        width: 180,
-        height: 180
-    });
-}
+    // Generate QR Code - Only for admin
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    window.onload = function() {
+        new QRCode(document.getElementById("qrcode"), {
+            text: window.location.href,
+            width: 180,
+            height: 180
+        });
+    }
+    {% endif %}
 
-// Print QR Code
-function printQRCode() {
-    const printWindow = window.open('', '', 'width=600,height=600');
-    const qrCode = document.getElementById('qrcode').innerHTML;
-
-    printWindow.document.write(`
+// Print QR Code - Fixed for mobile
+function handlePrintQR() {
+    // Create a new window for printing
+    const printContent = `
+        <!DOCTYPE html>
         <html>
-            <head>
-                <title>Print QR Code - ${document.title}</title>
-                <style>
+        <head>
+            <title>QR Code - ${document.title}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .container {
+                    text-align: center;
+                }
+                .qr-code {
+                    margin-bottom: 20px;
+                }
+                .info {
+                    font-family: Arial, sans-serif;
+                    margin-top: 20px;
+                }
+                @media print {
                     body {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                        margin: 0;
+                        min-height: auto;
+                        padding: 0;
                     }
                     .container {
-                        text-align: center;
+                        page-break-inside: avoid;
                     }
-                    .qr-code {
-                        margin-bottom: 20px;
-                    }
-                    .info {
-                        font-family: Arial, sans-serif;
-                        color: #4B5563;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="qr-code">${qrCode}</div>
-                    <div class="info">
-                        <h2>${'{{ user.name }}'}</h2>
-                        <p>${'{{ user.title }}'}</p>
-                    </div>
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="qr-code">
+                    ${document.getElementById('qrcode').innerHTML}
                 </div>
-            </body>
+                <div class="info">
+                    <h2 style="margin: 0;">${'{{ user.name }}'}</h2>
+                    <p style="margin: 5px 0; color: #666;">${'{{ user.title }}'}</p>
+                </div>
+            </div>
+        </body>
         </html>
-    `);
+    `;
 
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-    }, 250);
+    // Create a blob and generate URL
+    const blob = new Blob([printContent], { type: 'text/html' });
+    const printUrl = URL.createObjectURL(blob);
+
+    // Create an iframe for printing (this works better on mobile)
+    const printFrame = document.createElement('iframe');
+    printFrame.style.display = 'none';
+    document.body.appendChild(printFrame);
+
+    printFrame.src = printUrl;
+    printFrame.onload = function() {
+        try {
+            printFrame.contentWindow.print();
+
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+                URL.revokeObjectURL(printUrl);
+            }, 1000);
+        } catch (e) {
+            console.error('Print failed:', e);
+            alert('Could not print. Please try saving as PDF instead.');
+        }
+    };
 }
 
-// Download vCard
-function downloadVCard() {
-    const vCard = `BEGIN:VCARD
-VERSION:3.0
-FN:${'{{ user.name }}'}
-TITLE:${'{{ user.title }}'}
-TEL:${'{{ user.phone }}'}
-EMAIL:${'{{ user.email }}'}
-ADR:;;${'{{ user.location }}'};;;
-${user.instagram ? `X-SOCIALPROFILE;TYPE=instagram:https://instagram.com/${'{{ user.instagram }}'}` : ''}
-${user.twitter ? `X-SOCIALPROFILE;TYPE=twitter:https://twitter.com/${'{{ user.twitter }}'}` : ''}
-${user.whatsapp ? `X-SOCIALPROFILE;TYPE=whatsapp:https://wa.me/${'{{ user.whatsapp }}'}` : ''}
-END:VCARD`;
+// Updated vCard Download with photo
+async function handleVCardDownload() {
+    try {
+        let photoData = '';
+        {% if user.photo_path %}
+        // Fetch and convert the image to base64
+        try {
+            const response = await fetch("{{ url_for('static', filename=user.photo_path) }}");
+            const blob = await response.blob();
+            photoData = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            console.error('Error loading photo:', error);
+        }
+        {% endif %}
 
-    const blob = new Blob([vCard], { type: 'text/vcard' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${'{{ user.name }}'.replace(/\s+/g, '_')}_card.vcf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+        // Format phone number
+        const phone = '{{ user.phone }}'.replace(/[^\d+]/g, '');
+
+        // Create vCard content with photo
+        const vCardContent = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN:${'{{ user.name }}'}`,
+            `TITLE:${'{{ user.title }}'}`,
+            `TEL;type=CELL:${phone}`,
+            `EMAIL:${'{{ user.email }}'}`,
+            `URL:${window.location.href}`,
+            {% if user.location %}`ADR;type=WORK:;;${'{{ user.location }}'};;;`,{% endif %}
+            // Add photo if available
+            photoData ? `PHOTO;ENCODING=b;TYPE=JPEG:${photoData}` : '',
+            {% if user.instagram %}`X-SOCIALPROFILE;type=instagram:https://instagram.com/${'{{ user.instagram }}'}`,{% endif %}
+            {% if user.twitter %}`X-SOCIALPROFILE;type=twitter:https://twitter.com/${'{{ user.twitter }}'}`,{% endif %}
+            {% if user.whatsapp %}`X-SOCIALPROFILE;type=whatsapp:https://wa.me/${'{{ user.whatsapp }}'}`,{% endif %}
+            {% if user.snapchat %}`X-SOCIALPROFILE;type=snapchat:https://snapchat.com/add/${'{{ user.snapchat }}'}`,{% endif %}
+            'END:VCARD'
+        ].filter(Boolean).join('\n');
+
+        // Create blob and trigger download
+        const blob = new Blob([vCardContent], { type: 'text/vcard;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${'{{ user.name }}'.replace(/\s+/g, '_')}_card.vcf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error creating vCard:', error);
+        alert('There was an error creating the vCard. Please try again.');
+    }
 }
 </script>
 {% endblock %}

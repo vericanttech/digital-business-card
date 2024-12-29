@@ -4,19 +4,19 @@
     <!-- Navigation -->
     <nav class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
+            <div class="flex flex-wrap justify-between h-auto sm:h-16 py-2 sm:py-0">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
                         <h1 class="text-xl font-bold text-gray-900">Business Card Manager</h1>
                     </div>
                 </div>
-                <div class="flex items-center">
+                <div class="flex items-center space-x-2">
                     <a href="{{ url_for('create_card') }}"
-                       class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                       class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                         Create New Card
                     </a>
                     <a href="{{ url_for('logout') }}"
-                       class="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                       class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                         Logout
                     </a>
                 </div>
@@ -52,49 +52,49 @@
             <div class="bg-white shadow overflow-hidden sm:rounded-md">
                 <ul class="divide-y divide-gray-200">
                     {% for card in cards %}
-                    <li>
-                        <div class="px-4 py-4 sm:px-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    {% if card.photo_path %}
-                                    <img class="h-10 w-10 rounded-full object-cover"
-                                         src="{{ url_for('static', filename=card.photo_path) }}"
-                                         alt="{{ card.name }}">
-                                    {% else %}
-                                    <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                    {% endif %}
-                                    <div class="ml-4">
-                                        <h3 class="text-lg font-medium text-gray-900">
+                    <li class="px-4 py-4 sm:px-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div class="flex items-start sm:items-center mb-4 sm:mb-0">
+                                {% if card.photo_path %}
+                                <img class="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                                     src="{{ url_for('static', filename=card.photo_path) }}"
+                                     alt="{{ card.name }}">
+                                {% else %}
+                                <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                {% endif %}
+                                <div class="ml-4 min-w-0 flex-1">
+                                    <div class="flex flex-col sm:flex-row sm:items-center">
+                                        <h3 class="text-lg font-medium text-gray-900 truncate">
                                             {{ card.name }}
-                                            <span class="ml-2 text-sm text-gray-500">{{ card.title }}</span>
                                         </h3>
-                                        <div class="mt-1 text-sm text-gray-500">
-                                            <span class="mr-4">
-                                                <i class="fas fa-envelope mr-1"></i>{{ card.email }}
-                                            </span>
-                                            <span>
-                                                <i class="fas fa-phone mr-1"></i>{{ card.phone }}
-                                            </span>
-                                        </div>
+                                        <span class="text-sm text-gray-500 sm:ml-2 truncate">{{ card.title }}</span>
+                                    </div>
+                                    <div class="mt-1 text-sm text-gray-500 flex flex-col sm:flex-row">
+                                        <span class="truncate mr-4">
+                                            <i class="fas fa-envelope mr-1"></i>{{ card.email }}
+                                        </span>
+                                        <span class="truncate">
+                                            <i class="fas fa-phone mr-1"></i>{{ card.phone }}
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="flex space-x-2">
-                                    <a href="{{ url_for('view_card', unique_id=card.unique_id) }}"
-                                       class="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                                       target="_blank">
-                                        <i class="fas fa-eye mr-2"></i>View
-                                    </a>
-                                    <a href="{{ url_for('edit_card', unique_id=card.unique_id) }}"
-                                       class="inline-flex items-center px-3 py-1 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100">
-                                        <i class="fas fa-edit mr-2"></i>Edit
-                                    </a>
-                                    <button onclick="confirmDelete('{{ card.unique_id }}')"
-                                            class="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100">
-                                        <i class="fas fa-trash-alt mr-2"></i>Delete
-                                    </button>
-                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
+                                <a href="{{ url_for('view_card', unique_id=card.unique_id) }}"
+                                   class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                   target="_blank">
+                                    <i class="fas fa-eye mr-1.5"></i>View
+                                </a>
+                                <a href="{{ url_for('edit_card', unique_id=card.unique_id) }}"
+                                   class="inline-flex items-center px-2.5 py-1.5 border border-blue-300 text-xs sm:text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100">
+                                    <i class="fas fa-edit mr-1.5"></i>Edit
+                                </a>
+                                <button onclick="confirmDelete('{{ card.unique_id }}')"
+                                        class="inline-flex items-center px-2.5 py-1.5 border border-red-300 text-xs sm:text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100">
+                                    <i class="fas fa-trash-alt mr-1.5"></i>Delete
+                                </button>
                             </div>
                         </div>
                     </li>
