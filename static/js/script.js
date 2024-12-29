@@ -1,179 +1,102 @@
 // static/js/script.js
-let map;
-let marker;
-let geocoder;
-let infoWindow;
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on the create card page
+    // Initialize location input if it exists
     const locationInput = document.getElementById('location');
     if (locationInput) {
-        initializeLocationSearch();
-    }
-
-    // Check if we're on the view card page
-    const mapDiv = document.getElementById('map');
-    if (mapDiv) {
-        // Load Google Maps API
-        loadGoogleMapsScript();
+        initializeLocationInput(locationInput);
     }
 });
 
-function loadGoogleMapsScript() {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+function initializeLocationInput(input) {
+    // Helper text element
+    const helperText = document.createElement('p');
+    helperText.className = 'mt-1 text-sm text-gray-500';
+    helperText.textContent = 'Share your location from Google Maps (e.g., https://maps.app.goo.gl/... or https://www.google.com/maps/...)';
+    input.parentNode.appendChild(helperText);
+
+    // Update placeholder
+    input.placeholder = 'Paste your Google Maps share link';
+
+    // Optional: Add a button to get maps link
+    const helpButton = document.createElement('button');
+    helpButton.type = 'button';
+    helpButton.className = 'mt-2 text-sm text-blue-600 hover:text-blue-800';
+    helpButton.textContent = 'How to get your location link?';
+    helpButton.onclick = showLocationHelp;
+    input.parentNode.appendChild(helpButton);
 }
 
-function initializeLocationSearch() {
-    loadGoogleMapsScript();
-
-    const locationInput = document.getElementById('location');
-    const mapContainer = document.createElement('div');
-    mapContainer.id = 'map';
-    mapContainer.style.height = '200px';
-    mapContainer.style.marginTop = '1rem';
-
-    locationInput.parentNode.appendChild(mapContainer);
-
-    // Create location button
-    const locationButton = document.createElement('button');
-    locationButton.type = 'button';
-    locationButton.innerHTML = '<i class="fas fa-location-arrow"></i>';
-    locationButton.className = 'location-button';
-    locationInput.parentNode.appendChild(locationButton);
-
-    locationButton.addEventListener('click', () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                    };
-
-                    if (marker) {
-                        marker.setPosition(pos);
-                    }
-                    map.setCenter(pos);
-
-                    // Reverse geocode to get address
-                    geocoder.geocode({ location: pos }, (results, status) => {
-                        if (status === 'OK') {
-                            if (results[0]) {
-                                locationInput.value = results[0].formatted_address;
-                            }
-                        }
-                    });
-                },
-                () => {
-                    alert('Error: The Geolocation service failed.');
-                }
-            );
-        } else {
-            alert('Error: Your browser doesn\'t support geolocation.');
-        }
-    });
+function showLocationHelp() {
+    alert(`To get your location link:
+1. Open Google Maps
+2. Search for your location
+3. Click 'Share' or tap the location pin
+4. Copy the provided link`);
 }
 
-function initMap() {
-    const mapDiv = document.getElementById('map');
-    if (!mapDiv) return;
+// Image preview handler
+function previewImage(input) {
+    const preview = document.getElementById('preview-image');
+    const defaultPhoto = document.getElementById('default-photo');
 
-    geocoder = new google.maps.Geocoder();
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
 
-    // Initialize map with default center
-    map = new google.maps.Map(mapDiv, {
-        zoom: 15,
-        center: { lat: 0, lng: 0 },
-        styles: [
-            {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }]
-            }
-        ]
-    });
-
-    // Initialize info window
-    infoWindow = new google.maps.InfoWindow();
-
-    // If we're on the create card page
-    const locationInput = document.getElementById('location');
-    if (locationInput) {
-        // Initialize autocomplete
-        const autocomplete = new google.maps.places.Autocomplete(locationInput);
-        autocomplete.addListener('place_changed', () => {
-            const place = autocomplete.getPlace();
-            if (!place.geometry) return;
-
-            // Update map
-            map.setCenter(place.geometry.location);
-            if (marker) {
-                marker.setPosition(place.geometry.location);
-            } else {
-                marker = new google.maps.Marker({
-                    map: map,
-                    position: place.geometry.location,
-                    draggable: true
-                });
-            }
-        });
-
-        // Initialize marker
-        marker = new google.maps.Marker({
-            map: map,
-            draggable: true
-        });
-
-        // Handle marker drag events
-        marker.addListener('dragend', () => {
-            const position = marker.getPosition();
-            geocoder.geocode({ location: position }, (results, status) => {
-                if (status === 'OK') {
-                    if (results[0]) {
-                        locationInput.value = results[0].formatted_address;
-                    }
-                }
-            });
-        });
-
-        // Try to get user's location
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                    };
-                    map.setCenter(pos);
-                    marker.setPosition(pos);
-
-                    // Get address for the location
-                    geocoder.geocode({ location: pos }, (results, status) => {
-                        if (status === 'OK') {
-                            if (results[0]) {
-                                locationInput.value = results[0].formatted_address;
-                            }
-                        }
-                    });
-                }
-            );
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            defaultPhoto.classList.add('hidden');
         }
-    } else {
-        // We're on the view card page
-        const location = document.querySelector('.contact-info p:last-child').textContent;
-        geocoder.geocode({ address: location }, (results, status) => {
-            if (status === 'OK') {
-                const position = results[0].geometry.location;
-                map.setCenter(position);
-                new google.maps.Marker({
-                    map: map,
-                    position: position
-                });
-            }
-        });
+
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// QR Modal functions
+function showQRModal(qrCode, cardUrl) {
+    const modal = document.getElementById('qr-modal');
+    if (modal) {
+        document.getElementById('qr-image').src = 'data:image/png;base64,' + qrCode;
+        document.getElementById('share-link').value = cardUrl;
+        modal.classList.remove('hidden');
+    }
+}
+
+function closeModal() {
+    const modal = document.getElementById('qr-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function copyLink() {
+    const linkInput = document.getElementById('share-link');
+    if (linkInput) {
+        linkInput.select();
+        document.execCommand('copy');
+
+        const button = event.target;
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+            button.textContent = originalText;
+        }, 2000);
+    }
+}
+
+function shareCard(platform) {
+    const url = document.getElementById('share-link').value;
+    const text = "Check out my digital business card!";
+
+    switch(platform) {
+        case 'whatsapp':
+            window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`);
+            break;
+        case 'email':
+            window.open(`mailto:?subject=Digital Business Card&body=${encodeURIComponent(text + '\n\n' + url)}`);
+            break;
+        case 'twitter':
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text + ' ' + url)}`);
+            break;
     }
 }
