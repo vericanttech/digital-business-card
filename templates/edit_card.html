@@ -67,15 +67,18 @@
             <div>
                 <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
                 <div class="mt-1 relative">
-                    <input type="text" id="location" name="location" value="{{ card.location }}" required 
-                           placeholder="Enter your location"
+                    <input type="text" id="location" name="location"
+                           value="{{ card.location }}"
+                           placeholder="Enter location or use current location"
                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10">
-                    <button type="button" onclick="getCurrentLocation()" 
+                    <button type="button" onclick="getCurrentLocation()"
                             class="absolute inset-y-0 right-0 px-3 flex items-center bg-transparent text-gray-500 hover:text-gray-700">
                         <i class="fas fa-location-arrow"></i>
                     </button>
                 </div>
-                <div id="map" class="mt-2 h-32 rounded-lg overflow-hidden border border-gray-200"></div>
+                <p class="mt-1 text-sm text-gray-500">
+                    Location access may not work on all devices. You can type the location manually.
+                </p>
             </div>
 
             <!-- Social Media Section -->
@@ -161,29 +164,58 @@ function previewImage(input) {
 
 function getCurrentLocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            const pos = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
-            
-            // Update map if it exists
-            if (window.map && window.marker) {
-                window.map.setCenter(pos);
-                window.marker.setPosition(pos);
-                // Reverse geocode to get address
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ location: pos }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        document.getElementById('location').value = results[0].formatted_address;
-                    }
-                });
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                // Update map if it exists
+                if (window.map && window.marker) {
+                    window.map.setCenter(pos);
+                    window.marker.setPosition(pos);
+                    // Reverse geocode to get address
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ location: pos }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            document.getElementById('location').value = results[0].formatted_address;
+                        } else {
+                            // If geocoding fails, just use coordinates
+                            document.getElementById('location').value = `${pos.lat}, ${pos.lng}`;
+                        }
+                    });
+                } else {
+                    // If map isn't available, just use coordinates
+                    document.getElementById('location').value = `${pos.lat}, ${pos.lng}`;
+                }
+            },
+            function(error) {
+                let errorMessage;
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = "Location access was denied. Please enter location manually.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = "Location information is unavailable. Please enter location manually.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = "Location request timed out. Please enter location manually.";
+                        break;
+                    default:
+                        errorMessage = "An unknown error occurred. Please enter location manually.";
+                        break;
+                }
+                alert(errorMessage);
+            },
+            {
+                maximumAge: 60000,
+                timeout: 5000,
+                enableHighAccuracy: true
             }
-        }, function() {
-            alert('Error: Unable to retrieve your location');
-        });
+        );
     } else {
-        alert('Error: Geolocation is not supported by this browser');
+        alert("Geolocation is not supported by this browser. Please enter location manually.");
     }
 }
 </script>

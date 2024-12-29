@@ -153,30 +153,43 @@ def edit_card(unique_id):
     if request.method == 'POST':
         try:
             # Update basic info
-            card.name = request.form['name']
-            card.title = request.form['title']
-            card.phone = request.form['phone']
-            card.email = request.form['email']
-            card.location = request.form['location']
+            card.name = request.form.get('name')
+            card.title = request.form.get('title')
+            card.phone = request.form.get('phone')
+            card.email = request.form.get('email')
+
+            # Handle location - keep existing if not provided
+            new_location = request.form.get('location')
+            if new_location:
+                card.location = new_location
+            # If no location provided and no existing location, set a default
+            elif not card.location:
+                card.location = "Location not specified"
+
+            # Optional fields
             card.instagram = request.form.get('instagram')
             card.whatsapp = request.form.get('whatsapp')
             card.twitter = request.form.get('twitter')
             card.snapchat = request.form.get('snapchat')
 
             # Handle photo update if provided
-            if 'photo' in request.files and request.files['photo'].filename:
+            if 'photo' in request.files:
                 photo = request.files['photo']
-                filename = f"{card.unique_id}_{photo.filename}"
-                photo_path = f"photos/{filename}"
-                photo.save(f"static/{photo_path}")
-                card.photo_path = photo_path
+                if photo.filename:
+                    filename = f"{card.unique_id}_{photo.filename}"
+                    photo_path = f"photos/{filename}"
+                    photo.save(f"static/{photo_path}")
+                    card.photo_path = photo_path
 
             db.session.commit()
-            flash('Card updated successfully!')
+            flash('Card updated successfully!', 'success')
             return redirect(url_for('dashboard'))
 
         except Exception as e:
-            flash(f'Error updating card: {str(e)}')
+            print(f"Error updating card: {str(e)}")
+            db.session.rollback()
+            flash('Could not update the card. Please try again.', 'error')
+            return render_template('edit_card.html', card=card)
 
     return render_template('edit_card.html', card=card)
 
