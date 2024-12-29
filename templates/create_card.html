@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- QR Code Modal -->
+<div id="qr-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="flex flex-col items-center">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Your Digital Card is Ready!</h3>
+
+            <!-- QR Code Display -->
+            <div class="qr-code-container mb-4">
+                <img id="qr-image" src="" alt="QR Code" class="w-64 h-64">
+            </div>
+
+            <!-- Share Link -->
+            <div class="w-full px-4 mb-4">
+                <div class="relative">
+                    <input type="text" id="share-link"
+                           class="w-full pr-24 pl-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           readonly>
+                    <button onclick="copyLink()"
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Share Options -->
+            <div class="flex space-x-4 mb-6">
+                <button onclick="shareCard('whatsapp')" class="p-2 bg-green-500 text-white rounded-full hover:bg-green-600">
+                    <i class="fab fa-whatsapp text-xl"></i>
+                </button>
+                <button onclick="shareCard('email')" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+                    <i class="fas fa-envelope text-xl"></i>
+                </button>
+                <button onclick="shareCard('twitter')" class="p-2 bg-blue-400 text-white rounded-full hover:bg-blue-500">
+                    <i class="fab fa-twitter text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Close Button -->
+            <button onclick="closeModal()"
+                    class="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Create Your Digital Business Card</h1>
+
+        <form action="{{ url_for('create_card') }}" method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-6">
+            <!-- Photo Upload Section -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Profile Photo</label>
+                <div class="flex flex-col items-center space-y-4">
+                    <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden" id="photo-preview">
+                        <svg class="h-16 w-16 text-gray-400" id="default-photo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <img id="preview-image" class="hidden w-full h-full object-cover" alt="Preview">
+                    </div>
+                    <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Upload Photo
+                        <input type="file" id="photo" name="photo" accept="image/*" required class="hidden" onchange="previewImage(this)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Job Title</label>
+                    <input type="text" id="title" name="title" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                    <input type="tel" id="phone" name="phone" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                <div class="mt-1 relative">
+                    <input type="text" id="location" name="location" required
+                           placeholder="Enter your location"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10">
+                    <button type="button" onclick="getCurrentLocation()"
+                            class="absolute inset-y-0 right-0 px-3 flex items-center bg-transparent text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
+                </div>
+                <div id="map" class="mt-2 h-32 rounded-lg overflow-hidden border border-gray-200"></div>
+                <!-- Hidden input for coordinates -->
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-medium text-gray-900">Social Media (Optional)</h3>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="instagram" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-instagram mr-2 text-pink-500"></i>Instagram
+                        </label>
+                        <input type="text" id="instagram" name="instagram"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="whatsapp" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-whatsapp mr-2 text-green-500"></i>WhatsApp
+                        </label>
+                        <input type="text" id="whatsapp" name="whatsapp"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="twitter" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-twitter mr-2 text-blue-400"></i>Twitter
+                        </label>
+                        <input type="text" id="twitter" name="twitter"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="snapchat" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-snapchat-ghost mr-2 text-yellow-400"></i>Snapchat
+                        </label>
+                        <input type="text" id="snapchat" name="snapchat"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4">
+                <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-qrcode mr-2"></i>
+                    Generate Card
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Form submission handler (only once!)
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch('/create_card', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showQRModal(data.qr_code, data.card_url);
+        } else {
+            alert('Error creating card: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating your card. Please try again.');
+    });
+});
+
+// Image preview handler
+function previewImage(input) {
+    const preview = document.getElementById('preview-image');
+    const defaultPhoto = document.getElementById('default-photo');
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            defaultPhoto.classList.add('hidden');
+        }
+
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Location handler
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            // Update hidden inputs
+            document.getElementById('latitude').value = pos.lat;
+            document.getElementById('longitude').value = pos.lng;
+
+            // Update map if it exists
+            if (window.map && window.marker) {
+                window.map.setCenter(pos);
+                window.marker.setPosition(pos);
+                // Reverse geocode to get address
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: pos }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        document.getElementById('location').value = results[0].formatted_address;
+                    }
+                });
+            }
+        }, function() {
+            alert('Error: Unable to retrieve your location');
+        });
+    } else {
+        alert('Error: Geolocation is not supported by this browser');
+    }
+}
+
+// Modal functions
+function showQRModal(qrCode, cardUrl) {
+    // Set QR code image
+    document.getElementById('qr-image').src = 'data:image/png;base64,' + qrCode;
+
+    // Set share link
+    document.getElementById('share-link').value = cardUrl;
+
+    // Show modal
+    document.getElementById('qr-modal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('qr-modal').classList.add('hidden');
+}
+
+function copyLink() {
+    const linkInput = document.getElementById('share-link');
+    linkInput.select();
+    document.execCommand('copy');
+
+    // Show feedback
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    setTimeout(() => {
+        button.textContent = originalText;
+    }, 2000);
+}
+
+function shareCard(platform) {
+    const url = document.getElementById('share-link').value;
+    const text = "Check out my digital business card!";
+
+    switch(platform) {
+        case 'whatsapp':
+            window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`);
+            break;
+        case 'email':
+            window.open(`mailto:?subject=Digital Business Card&body=${encodeURIComponent(text + '\n\n' + url)}`);
+            break;
+        case 'twitter':
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text + ' ' + url)}`);
+            break;
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('qr-modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+</script>
+{% endblock %}

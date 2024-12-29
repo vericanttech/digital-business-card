@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Card Details -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <!-- Profile Header -->
+                <div class="relative h-32 bg-gradient-to-r from-blue-500 to-blue-600">
+                    <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                        {% if user.photo_path %}
+                        <img src="{{ url_for('static', filename=user.photo_path) }}"
+                             alt="{{ user.name }}"
+                             class="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg">
+                        {% else %}
+                        <div class="w-24 h-24 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-user text-3xl text-gray-400"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Profile Info -->
+                <div class="pt-16 px-6 pb-6">
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ user.name }}</h1>
+                        <p class="text-blue-600 font-medium mt-1">{{ user.title }}</p>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="mt-6 space-y-4">
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <a href="tel:{{ user.phone }}" class="ml-3 text-gray-700 hover:text-blue-600 transition">
+                                {{ user.phone }}
+                            </a>
+                        </div>
+
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <a href="mailto:{{ user.email }}" class="ml-3 text-gray-700 hover:text-blue-600 transition">
+                                {{ user.email }}
+                            </a>
+                        </div>
+
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <span class="ml-3 text-gray-700">{{ user.location }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Social Media Links -->
+                    {% if user.instagram or user.whatsapp or user.twitter or user.snapchat %}
+                    <div class="mt-6 flex justify-center space-x-4">
+                        {% if user.instagram %}
+                        <a href="https://instagram.com/{{ user.instagram }}" target="_blank"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 text-white hover:opacity-90 transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if user.whatsapp %}
+                        <a href="https://wa.me/{{ user.whatsapp }}" target="_blank"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if user.twitter %}
+                        <a href="https://twitter.com/{{ user.twitter }}" target="_blank"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-400 text-white hover:bg-blue-500 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if user.snapchat %}
+                        <a href="https://snapchat.com/add/{{ user.snapchat }}" target="_blank"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-400 text-white hover:bg-yellow-500 transition">
+                            <i class="fab fa-snapchat-ghost"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Map -->
+                    <div class="mt-6">
+                        <div id="map" class="h-40 rounded-lg overflow-hidden shadow-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="text-center">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Share Business Card</h2>
+                    <div id="qrcode" class="flex justify-center mb-4">
+                        <!-- QR Code will be generated here -->
+                    </div>
+                    <div class="space-y-4">
+                        <button onclick="printQRCode()" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-print mr-2"></i>
+                            Print QR Code
+                        </button>
+                        <button onclick="downloadVCard()" class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <i class="fas fa-download mr-2"></i>
+                            Download vCard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// Generate QR Code
+window.onload = function() {
+    new QRCode(document.getElementById("qrcode"), {
+        text: window.location.href,
+        width: 180,
+        height: 180
+    });
+}
+
+// Print QR Code
+function printQRCode() {
+    const printWindow = window.open('', '', 'width=600,height=600');
+    const qrCode = document.getElementById('qrcode').innerHTML;
+
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Print QR Code - ${document.title}</title>
+                <style>
+                    body {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                    }
+                    .container {
+                        text-align: center;
+                    }
+                    .qr-code {
+                        margin-bottom: 20px;
+                    }
+                    .info {
+                        font-family: Arial, sans-serif;
+                        color: #4B5563;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="qr-code">${qrCode}</div>
+                    <div class="info">
+                        <h2>${'{{ user.name }}'}</h2>
+                        <p>${'{{ user.title }}'}</p>
+                    </div>
+                </div>
+            </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 250);
+}
+
+// Download vCard
+function downloadVCard() {
+    const vCard = `BEGIN:VCARD
+VERSION:3.0
+FN:${'{{ user.name }}'}
+TITLE:${'{{ user.title }}'}
+TEL:${'{{ user.phone }}'}
+EMAIL:${'{{ user.email }}'}
+ADR:;;${'{{ user.location }}'};;;
+${user.instagram ? `X-SOCIALPROFILE;TYPE=instagram:https://instagram.com/${'{{ user.instagram }}'}` : ''}
+${user.twitter ? `X-SOCIALPROFILE;TYPE=twitter:https://twitter.com/${'{{ user.twitter }}'}` : ''}
+${user.whatsapp ? `X-SOCIALPROFILE;TYPE=whatsapp:https://wa.me/${'{{ user.whatsapp }}'}` : ''}
+END:VCARD`;
+
+    const blob = new Blob([vCard], { type: 'text/vcard' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${'{{ user.name }}'.replace(/\s+/g, '_')}_card.vcf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

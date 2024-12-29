@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Back to dashboard button -->
+        <a href="{{ url_for('dashboard') }}" class="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6">
+            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+        </a>
+
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Edit Business Card</h1>
+        
+        <form action="{{ url_for('edit_card', unique_id=card.unique_id) }}" method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-6">
+            <!-- Photo Upload Section -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Profile Photo</label>
+                <div class="flex flex-col items-center space-y-4">
+                    <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden" id="photo-preview">
+                        {% if card.photo_path %}
+                        <img src="{{ url_for('static', filename=card.photo_path) }}" alt="{{ card.name }}" id="preview-image" class="w-full h-full object-cover">
+                        {% else %}
+                        <svg class="h-16 w-16 text-gray-400" id="default-photo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Update Photo
+                        <input type="file" id="photo" name="photo" accept="image/*" class="hidden" onchange="previewImage(this)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="name" name="name" value="{{ card.name }}" required 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Job Title</label>
+                    <input type="text" id="title" name="title" value="{{ card.title }}" required 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                    <input type="tel" id="phone" name="phone" value="{{ card.phone }}" required 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" value="{{ card.email }}" required 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                <div class="mt-1 relative">
+                    <input type="text" id="location" name="location" value="{{ card.location }}" required 
+                           placeholder="Enter your location"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10">
+                    <button type="button" onclick="getCurrentLocation()" 
+                            class="absolute inset-y-0 right-0 px-3 flex items-center bg-transparent text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
+                </div>
+                <div id="map" class="mt-2 h-32 rounded-lg overflow-hidden border border-gray-200"></div>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-medium text-gray-900">Social Media (Optional)</h3>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="instagram" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-instagram mr-2 text-pink-500"></i>Instagram
+                        </label>
+                        <input type="text" id="instagram" name="instagram" value="{{ card.instagram or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="whatsapp" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-whatsapp mr-2 text-green-500"></i>WhatsApp
+                        </label>
+                        <input type="text" id="whatsapp" name="whatsapp" value="{{ card.whatsapp or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="twitter" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-twitter mr-2 text-blue-400"></i>Twitter
+                        </label>
+                        <input type="text" id="twitter" name="twitter" value="{{ card.twitter or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="snapchat" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-snapchat-ghost mr-2 text-yellow-400"></i>Snapchat
+                        </label>
+                        <input type="text" id="snapchat" name="snapchat" value="{{ card.snapchat or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-end space-x-4">
+                <a href="{{ url_for('dashboard') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('preview-image');
+    const defaultPhoto = document.getElementById('default-photo');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            if (preview) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            } else {
+                const newPreview = document.createElement('img');
+                newPreview.src = e.target.result;
+                newPreview.id = 'preview-image';
+                newPreview.className = 'w-full h-full object-cover';
+                document.getElementById('photo-preview').appendChild(newPreview);
+            }
+            if (defaultPhoto) {
+                defaultPhoto.classList.add('hidden');
+            }
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            
+            // Update map if it exists
+            if (window.map && window.marker) {
+                window.map.setCenter(pos);
+                window.marker.setPosition(pos);
+                // Reverse geocode to get address
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: pos }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        document.getElementById('location').value = results[0].formatted_address;
+                    }
+                });
+            }
+        }, function() {
+            alert('Error: Unable to retrieve your location');
+        });
+    } else {
+        alert('Error: Geolocation is not supported by this browser');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+<!-- templates/qr_code.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Your Digital Business Card is Ready!</h1>
+    <div class="qr-container">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+        <p>Scan this QR code to view your digital business card</p>
+        <p>Or share this link: <a href="{{ card_url }}">{{ card_url }}</a></p>
+    </div>
+</div>
+{% endblock %}
