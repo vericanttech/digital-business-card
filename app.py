@@ -7,9 +7,14 @@ import base64
 import os
 from models.user import db, Admin, BusinessCard  # Remove User from import
 
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'  # Change this
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///business_cards.db'
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize Flask-Login
