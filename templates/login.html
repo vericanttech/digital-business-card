@@ -1,38 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white flex">
+<div class="min-h-screen bg-gradient-to-b from-orange-50 to-white flex">
     <!-- Left side with illustration -->
-    <div class="hidden lg:flex lg:w-1/2 bg-blue-600 flex-col justify-center items-center px-12 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-90"></div>
+    <div class="hidden lg:flex lg:w-1/2 bg-[#F15A22] flex-col justify-center items-center px-12 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#F15A22] to-orange-700 opacity-90"></div>
         <div class="relative z-10 text-center">
-            <svg class="w-32 h-32 text-white mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-            <h2 class="text-3xl font-bold text-white mb-4">Welcome back to DigiCard</h2>
-            <p class="text-blue-100 text-lg max-w-md">
-                Manage your digital business cards and keep your professional network updated instantly.
+            <!-- Logo -->
+            <div class="w-32 h-32 mx-auto bg-white rounded-full flex items-center justify-center mb-8">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="QR Pro Creator" class="w-24 h-24">
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-4">Bienvenue chez QR Pro Creator</h2>
+            <p class="text-orange-100 text-lg max-w-md">
+                Gérez vos cartes de visite numériques et gardez votre réseau professionnel à jour instantanément.
             </p>
 
             <!-- Feature points -->
             <div class="mt-12 space-y-4 text-left">
-                <div class="flex items-center text-blue-100">
+                <div class="flex items-center text-orange-100">
                     <svg class="h-6 w-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Create unlimited digital business cards</span>
+                    <span>Créez des cartes de visite numériques illimitées</span>
                 </div>
-                <div class="flex items-center text-blue-100">
+                <div class="flex items-center text-orange-100">
                     <svg class="h-6 w-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Share instantly via QR codes</span>
+                    <span>Partagez instantanément via QR codes et NFC</span>
                 </div>
-                <div class="flex items-center text-blue-100">
+                <div class="flex items-center text-orange-100">
                     <svg class="h-6 w-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Track and manage all your cards</span>
+                    <span>Suivez et gérez toutes vos cartes</span>
                 </div>
             </div>
         </div>
@@ -47,17 +47,17 @@
     <div class="w-full lg:w-1/2 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
         <div class="mx-auto w-full max-w-sm lg:w-96">
             <div class="text-center lg:text-left">
-                <a href="{{ url_for('index') }}" class="inline-flex items-center text-blue-600 hover:text-blue-700 mb-8">
+                <a href="{{ url_for('index') }}" class="inline-flex items-center text-[#F15A22] hover:text-orange-700 mb-8">
                     <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to home
+                    Retour à l'accueil
                 </a>
                 <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
-                    Sign in to your account
+                    Connectez-vous à votre compte
                 </h2>
                 <p class="mt-2 text-sm text-gray-600">
-                    Manage your digital business cards and keep your network updated
+                    Gérez vos cartes de visite numériques et gardez votre réseau à jour
                 </p>
             </div>
 
@@ -86,7 +86,7 @@
 
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-700">
-                            Username
+                            Nom d'utilisateur
                         </label>
                         <div class="mt-1 relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -96,14 +96,14 @@
                                 </svg>
                             </div>
                             <input id="username" name="username" type="text" required
-                                   class="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                   placeholder="Enter your username">
+                                   class="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="Entrez votre nom d'utilisateur">
                         </div>
                     </div>
 
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">
-                            Password
+                            Mot de passe
                         </label>
                         <div class="mt-1 relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -113,19 +113,19 @@
                                 </svg>
                             </div>
                             <input id="password" name="password" type="password" required
-                                   class="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                   placeholder="Enter your password">
+                                   class="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="Entrez votre mot de passe">
                         </div>
                     </div>
 
                     <div>
                         <button type="submit"
-                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#F15A22] hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                             </svg>
-                            Sign in to Dashboard
+                            Se connecter au tableau de bord
                         </button>
                     </div>
                 </form>

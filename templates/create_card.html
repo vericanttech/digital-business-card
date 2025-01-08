@@ -4,11 +4,11 @@
 <div id="qr-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="flex flex-col items-center">
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Your Digital Card is Ready!</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Votre Carte Numérique est Prête !</h3>
 
             <!-- QR Code Display -->
             <div class="qr-code-container mb-4">
-                <img id="qr-image" src="" alt="QR Code" class="w-64 h-64">
+                <img id="qr-image" src="" alt="Code QR" class="w-64 h-64">
             </div>
 
             <!-- Share Link -->
@@ -19,7 +19,7 @@
                            readonly>
                     <button onclick="copyLink()"
                             class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Copy
+                        Copier
                     </button>
                 </div>
             </div>
@@ -32,15 +32,12 @@
                 <button onclick="shareCard('email')" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
                     <i class="fas fa-envelope text-xl"></i>
                 </button>
-                <button onclick="shareCard('twitter')" class="p-2 bg-blue-400 text-white rounded-full hover:bg-blue-500">
-                    <i class="fab fa-twitter text-xl"></i>
-                </button>
             </div>
 
             <!-- Close Button -->
             <button onclick="closeModal()"
                     class="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                Close
+                Fermer
             </button>
         </div>
     </div>
@@ -48,24 +45,24 @@
 
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Create Your Digital Business Card</h1>
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Créez Votre Carte de Visite Numérique</h1>
 
         <form action="{{ url_for('create_card') }}" method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-6">
             <!-- Photo Upload Section -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Profile Photo</label>
+                <label class="block text-sm font-medium text-gray-700">Photo de Profil</label>
                 <div class="flex flex-col items-center space-y-4">
                     <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden" id="photo-preview">
                         <svg class="h-16 w-16 text-gray-400" id="default-photo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <img id="preview-image" class="hidden w-full h-full object-cover" alt="Preview">
+                        <img id="preview-image" class="hidden w-full h-full object-cover" alt="Aperçu">
                     </div>
                     <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        Upload Photo
+                        Télécharger une Photo
                         <input type="file" id="photo" name="photo" accept="image/*" required class="hidden" onchange="previewImage(this)">
                     </label>
                 </div>
@@ -74,21 +71,42 @@
             <!-- Personal Information -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Nom Complet</label>
                     <input type="text" id="name" name="name" required
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
 
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700">Job Title</label>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Titre du Poste</label>
                     <input type="text" id="title" name="title" required
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
 
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                    <input type="tel" id="phone" name="phone" required
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <!-- Phone Numbers Section -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-gray-900">Numéros de Téléphone</h3>
+                    <div id="phone-numbers-container" class="space-y-4">
+                        <!-- Primary Phone (Always visible) -->
+                        <div class="phone-field">
+                            <label for="phone_primary" class="block text-sm font-medium text-gray-700">
+                                Numéro de Téléphone Principal *
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="tel" id="phone_primary" name="phone_primary" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                       placeholder="Entrez le numéro principal">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Phone Button -->
+                    <button type="button" id="add-phone-btn"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Ajouter un Autre Numéro
+                    </button>
                 </div>
 
                 <div>
@@ -99,90 +117,243 @@
             </div>
 
             <!-- Location Section -->
+            <div class="space-y-1">
+                <label for="address" class="block text-sm font-medium text-gray-700">Adresse</label>
+                <input type="text"
+                       name="address"
+                       id="address"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                       placeholder="Entrez votre adresse">
+            </div>
             <div class="mt-6">
-                <label for="location" class="block text-sm font-medium text-gray-700">Location Link</label>
+                <label for="location" class="block text-sm font-medium text-gray-700">Lien de Localisation</label>
                 <div class="mt-1">
                     <input type="text" id="location" name="location" required
-                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <!-- Helper text and help button will be added by JavaScript -->
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Entrez le lien Google Maps">
                 </div>
             </div>
 
             <!-- Social Media Section -->
             <div class="space-y-4">
-                <h3 class="text-lg font-medium text-gray-900">Social Media (Optional)</h3>
+                <h3 class="text-lg font-medium text-gray-900">Réseaux Sociaux (Optionnel)</h3>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="instagram" class="block text-sm font-medium text-gray-700">
-                            <i class="fab fa-instagram mr-2 text-pink-500"></i>Instagram
-                        </label>
-                        <input type="text" id="instagram" name="instagram"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
+                    <!-- Most common social media -->
                     <div>
                         <label for="whatsapp" class="block text-sm font-medium text-gray-700">
                             <i class="fab fa-whatsapp mr-2 text-green-500"></i>WhatsApp
                         </label>
                         <input type="text" id="whatsapp" name="whatsapp"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Numéro WhatsApp ou lien">
                     </div>
 
                     <div>
-                        <label for="twitter" class="block text-sm font-medium text-gray-700">
-                            <i class="fab fa-twitter mr-2 text-blue-400"></i>Twitter
+                        <label for="instagram" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-instagram mr-2 text-pink-500"></i>Instagram
                         </label>
-                        <input type="text" id="twitter" name="twitter"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
-                    <div>
-                        <label for="snapchat" class="block text-sm font-medium text-gray-700">
-                            <i class="fab fa-snapchat-ghost mr-2 text-yellow-400"></i>Snapchat
-                        </label>
-                        <input type="text" id="snapchat" name="snapchat"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <input type="text" id="instagram" name="instagram"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Nom d'utilisateur Instagram">
                     </div>
                 </div>
+
+                <!-- Additional social media container -->
+                <div id="additional-social-media" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <!-- Additional social media fields will be added here -->
+                </div>
+
+                <!-- Add Social Media Button -->
+                <button type="button" id="add-social-btn"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ajouter un Réseau Social
+                </button>
             </div>
 
             <div class="pt-4">
-                <button type="submit"
+                <button type="submit" id="submit-button"
                         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <i class="fas fa-qrcode mr-2"></i>
-                    Generate Card
+                    <span id="button-text">
+                        <i class="fas fa-qrcode mr-2"></i>
+                        Générer la Carte
+                    </span>
+                    <span id="button-loading" class="hidden">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="ml-2">Génération en cours...</span>
+                    </span>
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Social Media Management -->
 <script>
-// Form submission handler
-document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault();
+    window.addedSocials = new Set();
+document.addEventListener('DOMContentLoaded', function() {
+    const socialContainer = document.getElementById('additional-social-media');
+    const addSocialBtn = document.getElementById('add-social-btn');
 
-    const formData = new FormData(this);
+    const socialMediaOptions = [
+        { id: 'facebook', name: 'Facebook', icon: 'fa-facebook', color: 'text-blue-600' },
+        { id: 'linkedin', name: 'LinkedIn', icon: 'fa-linkedin', color: 'text-blue-700' },
+        { id: 'youtube', name: 'YouTube', icon: 'fa-youtube', color: 'text-red-600' },
+        { id: 'tiktok', name: 'TikTok', icon: 'fa-tiktok', color: 'text-gray-900' },
+        { id: 'twitter', name: 'Twitter', icon: 'fa-twitter', color: 'text-blue-400' },
+        { id: 'snapchat', name: 'Snapchat', icon: 'fa-snapchat-ghost', color: 'text-yellow-400' }
+    ];
 
-    fetch('/create_card', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showQRModal(data.qr_code, data.card_url);
-        } else {
-            alert('Error creating card: ' + data.error);
+    //let addedSocials = new Set();
+
+    function createSocialMediaSelector() {
+        const availableSocials = socialMediaOptions.filter(social => !addedSocials.has(social.id));
+
+        if (availableSocials.length === 0) {
+            addSocialBtn.style.display = 'none';
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while creating your card. Please try again.');
+
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'relative flex items-center space-x-2';
+
+        const selectHTML = `
+            <div class="flex-grow">
+                <select class="social-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Select Platform</option>
+                    ${availableSocials.map(social => `
+                        <option value="${social.id}"
+                                data-icon="${social.icon}"
+                                data-color="${social.color}">
+                            ${social.name}
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+        `;
+
+        fieldDiv.innerHTML = selectHTML;
+        socialContainer.appendChild(fieldDiv);
+
+        const select = fieldDiv.querySelector('.social-select');
+        select.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const socialId = this.value;
+
+            if (socialId) {
+                const social = socialMediaOptions.find(s => s.id === socialId);
+                addedSocials.add(socialId);
+
+                const inputField = document.createElement('div');
+                inputField.className = 'relative flex items-center space-x-2';
+                inputField.innerHTML = `
+                    <div class="flex-grow">
+                        <label for="${social.id}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab ${social.icon} mr-2 ${social.color}"></i>${social.name}
+                        </label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input type="text" id="${social.id}" name="${social.id}"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                   placeholder="Enter ${social.name} profile link">
+                        </div>
+                    </div>
+                    <button type="button" class="remove-social-btn mt-6 text-red-600 hover:text-red-800">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                `;
+
+                fieldDiv.replaceWith(inputField);
+
+                inputField.querySelector('.remove-social-btn').addEventListener('click', function() {
+                    addedSocials.delete(socialId);
+                    inputField.remove();
+                    addSocialBtn.style.display = 'inline-flex';
+                });
+            }
+        });
+    }
+
+    addSocialBtn.addEventListener('click', createSocialMediaSelector);
+});
+</script>
+
+<!-- Phone Numbers Management -->
+<script>
+    window.phoneCount = 1;
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('phone-numbers-container');
+    const addButton = document.getElementById('add-phone-btn');
+    // let phoneCount = 1;
+    const maxPhones = 4;
+
+    const phoneTypes = {
+        2: { name: 'secondary', label: 'Secondary' },
+        3: { name: 'third', label: 'Third' },
+        4: { name: 'fourth', label: 'Fourth' }
+    };
+
+    function createPhoneField(index) {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'phone-field relative';
+
+        const phoneType = phoneTypes[index];
+
+        fieldDiv.innerHTML = `
+            <div class="flex items-center space-x-2">
+                <div class="flex-grow">
+                    <label for="phone_${phoneType.name}" class="block text-sm font-medium text-gray-700">
+                        ${phoneType.label} Phone Number
+                    </label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input type="tel"
+                               id="phone_${phoneType.name}"
+                               name="phone_${phoneType.name}"
+                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Enter ${phoneType.label.toLowerCase()} phone number">
+                    </div>
+                </div>
+                <button type="button" class="remove-phone-btn mt-6 text-red-600 hover:text-red-800">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(fieldDiv);
+
+        // Add remove button handler
+        fieldDiv.querySelector('.remove-phone-btn').addEventListener('click', function() {
+            fieldDiv.remove();
+            phoneCount--;
+            addButton.style.display = 'inline-flex';
+        });
+    }
+
+    addButton.addEventListener('click', function() {
+        if (phoneCount < maxPhones) {
+            phoneCount++;
+            createPhoneField(phoneCount);
+
+            if (phoneCount >= maxPhones) {
+                addButton.style.display = 'none';
+            }
+        }
     });
 });
+</script>
 
-// Image preview handler
+
+
+<!-- Image Preview Handler -->
+<script>
 function previewImage(input) {
     const preview = document.getElementById('preview-image');
     const defaultPhoto = document.getElementById('default-photo');
@@ -199,16 +370,13 @@ function previewImage(input) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+</script>
 
-// Modal functions
+<!-- Modal Operations -->
+<script>
 function showQRModal(qrCode, cardUrl) {
-    // Set QR code image
     document.getElementById('qr-image').src = 'data:image/png;base64,' + qrCode;
-
-    // Set share link
     document.getElementById('share-link').value = cardUrl;
-
-    // Show modal
     document.getElementById('qr-modal').classList.remove('hidden');
 }
 
@@ -221,7 +389,6 @@ function copyLink() {
     linkInput.select();
     document.execCommand('copy');
 
-    // Show feedback
     const button = event.target;
     const originalText = button.textContent;
     button.textContent = 'Copied!';
@@ -247,12 +414,97 @@ function shareCard(platform) {
     }
 }
 
-// Close modal when clicking outside
+// Modal outside click handler
 window.onclick = function(event) {
     const modal = document.getElementById('qr-modal');
     if (event.target === modal) {
         closeModal();
     }
 }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const buttonLoading = document.getElementById('button-loading');
+
+    function setLoading(isLoading) {
+        submitButton.disabled = isLoading;
+        if (isLoading) {
+            buttonText.classList.add('hidden');
+            buttonLoading.classList.remove('hidden');
+        } else {
+            buttonText.classList.remove('hidden');
+            buttonLoading.classList.add('hidden');
+        }
+    }
+
+    function resetForm() {
+        // Reset all form fields
+        form.reset();
+
+        // Clear the image preview
+        const preview = document.getElementById('preview-image');
+        const defaultPhoto = document.getElementById('default-photo');
+        if (preview && defaultPhoto) {
+            preview.classList.add('hidden');
+            defaultPhoto.classList.remove('hidden');
+        }
+
+        // Remove additional phone fields
+        const additionalPhoneFields = document.querySelectorAll('.phone-field:not(:first-child)');
+        additionalPhoneFields.forEach(field => field.remove());
+
+        // Reset phone counter and show add button
+        phoneCount = 1;
+        const addPhoneButton = document.getElementById('add-phone-btn');
+        if (addPhoneButton) {
+            addPhoneButton.style.display = 'inline-flex';
+        }
+
+        // Clear all social media fields (both default and additional)
+        const socialContainer = document.getElementById('additional-social-media');
+        if (socialContainer) {
+            socialContainer.innerHTML = '';
+        }
+        addedSocials = new Set(); // Reset added socials tracking
+
+        // Show social media add button
+        const addSocialBtn = document.getElementById('add-social-btn');
+        if (addSocialBtn) {
+            addSocialBtn.style.display = 'inline-flex';
+        }
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        setLoading(true);
+
+        const formData = new FormData(this);
+
+        fetch('/create_card', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showQRModal(data.qr_code, data.card_url);
+                resetForm(); // Reset form after successful submission
+            } else {
+                alert('Error creating card: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while creating your card. Please try again.');
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+    });
+});
 </script>
 {% endblock %}

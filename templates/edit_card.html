@@ -7,15 +7,15 @@
             <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Dashboard
+            Retour au Tableau de Bord
         </a>
 
-        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Edit Business Card</h1>
-        
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Modifier la Carte de Visite</h1>
+
         <form action="{{ url_for('edit_card', unique_id=card.unique_id) }}" method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-6">
             <!-- Photo Upload Section -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Profile Photo</label>
+                <label class="block text-sm font-medium text-gray-700">Photo de Profil</label>
                 <div class="flex flex-col items-center space-y-4">
                     <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden" id="photo-preview">
                         {% if card.photo_path %}
@@ -30,7 +30,7 @@
                         <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        Update Photo
+                        Mettre à jour la Photo
                         <input type="file" id="photo" name="photo" accept="image/*" class="hidden" onchange="previewImage(this)">
                     </label>
                 </div>
@@ -39,56 +39,101 @@
             <!-- Personal Information -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input type="text" id="name" name="name" value="{{ card.name }}" required 
+                    <label for="name" class="block text-sm font-medium text-gray-700">Nom Complet</label>
+                    <input type="text" id="name" name="name" value="{{ card.name }}" required
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
 
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700">Job Title</label>
-                    <input type="text" id="title" name="title" value="{{ card.title }}" required 
+                    <label for="title" class="block text-sm font-medium text-gray-700">Titre du Poste</label>
+                    <input type="text" id="title" name="title" value="{{ card.title }}" required
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
 
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                    <input type="tel" id="phone" name="phone" value="{{ card.phone }}" required 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <!-- Phone Numbers Section -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-gray-900">Numéros de Téléphone</h3>
+                    <div id="phone-numbers-container" class="space-y-4">
+                        <!-- Primary Phone -->
+                        <div class="phone-field">
+                            <label for="phone_primary" class="block text-sm font-medium text-gray-700">
+                                Numéro de Téléphone Principal *
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="tel" id="phone_primary" name="phone_primary"
+                                       value="{{ card.phone_primary }}" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        {% if card.phone_secondary %}
+                        <div class="phone-field relative">
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-grow">
+                                    <label for="phone_secondary" class="block text-sm font-medium text-gray-700">
+                                        Numéro de Téléphone Secondaire
+                                    </label>
+                                    <div class="mt-1 flex rounded-md shadow-sm">
+                                        <input type="tel" id="phone_secondary" name="phone_secondary"
+                                               value="{{ card.phone_secondary }}"
+                                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <button type="button" class="remove-phone-btn mt-6 text-red-600 hover:text-red-800">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Add Phone Button -->
+                    <button type="button" id="add-phone-btn"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Ajouter un Autre Numéro
+                    </button>
                 </div>
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="email" name="email" value="{{ card.email }}" required 
+                    <input type="email" id="email" name="email" value="{{ card.email }}" required
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
             </div>
 
             <!-- Location Section -->
+            <div class="space-y-1">
+                <label for="address" class="block text-sm font-medium text-gray-700">Adresse</label>
+                <input type="text"
+                       name="address"
+                       value = "{{card.address}}"
+                       id="address"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                       placeholder="Entrez votre adresse">
+            </div>
             <div>
-                <label for="location" class="block text-sm font-medium text-gray-700">Location Link</label>
+                <label for="location" class="block text-sm font-medium text-gray-700">Lien de Localisation</label>
                 <div class="mt-1">
                     <input type="text" id="location" name="location"
                            value="{{ card.location }}"
-                           placeholder="Enter Google Maps link (e.g., https://maps.google.com/...)"
+                           placeholder="Entrez le lien Google Maps (ex: https://maps.google.com/...)"
                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <p class="mt-1 text-sm text-gray-500">
-                        Paste a Google Maps link to your location
+                        Collez un lien Google Maps vers votre emplacement
                     </p>
                 </div>
             </div>
 
             <!-- Social Media Section -->
             <div class="space-y-4">
-                <h3 class="text-lg font-medium text-gray-900">Social Media (Optional)</h3>
+                <h3 class="text-lg font-medium text-gray-900">Réseaux Sociaux (Optionnel)</h3>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="instagram" class="block text-sm font-medium text-gray-700">
-                            <i class="fab fa-instagram mr-2 text-pink-500"></i>Instagram
-                        </label>
-                        <input type="text" id="instagram" name="instagram" value="{{ card.instagram or '' }}"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
+                    <!-- Most common social media -->
                     <div>
                         <label for="whatsapp" class="block text-sm font-medium text-gray-700">
                             <i class="fab fa-whatsapp mr-2 text-green-500"></i>WhatsApp
@@ -98,46 +143,101 @@
                     </div>
 
                     <div>
+                        <label for="instagram" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-instagram mr-2 text-pink-500"></i>Instagram
+                        </label>
+                        <input type="text" id="instagram" name="instagram" value="{{ card.instagram or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <!-- Additional social media container -->
+                <div id="additional-social-media" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {% if card.facebook %}
+                    <div>
+                        <label for="facebook" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-facebook mr-2 text-blue-600"></i>Facebook
+                        </label>
+                        <input type="text" id="facebook" name="facebook" value="{{ card.facebook }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    {% endif %}
+
+                    {% if card.linkedin %}
+                    <div>
+                        <label for="linkedin" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-linkedin mr-2 text-blue-700"></i>LinkedIn
+                        </label>
+                        <input type="text" id="linkedin" name="linkedin" value="{{ card.linkedin }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    {% endif %}
+
+                    {% if card.twitter %}
+                    <div>
                         <label for="twitter" class="block text-sm font-medium text-gray-700">
                             <i class="fab fa-twitter mr-2 text-blue-400"></i>Twitter
                         </label>
-                        <input type="text" id="twitter" name="twitter" value="{{ card.twitter or '' }}"
+                        <input type="text" id="twitter" name="twitter" value="{{ card.twitter }}"
                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
+                    {% endif %}
 
+                    {% if card.snapchat %}
                     <div>
                         <label for="snapchat" class="block text-sm font-medium text-gray-700">
                             <i class="fab fa-snapchat-ghost mr-2 text-yellow-400"></i>Snapchat
                         </label>
-                        <input type="text" id="snapchat" name="snapchat" value="{{ card.snapchat or '' }}"
+                        <input type="text" id="snapchat" name="snapchat" value="{{ card.snapchat }}"
                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
+                    {% endif %}
                 </div>
+
+                <!-- Add Social Media Button -->
+                <button type="button" id="add-social-btn"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ajouter un Réseau Social
+                </button>
             </div>
 
+            <!-- Form Actions -->
             <div class="pt-4 flex justify-end space-x-4">
-                <a href="{{ url_for('dashboard') }}" 
+                <a href="{{ url_for('dashboard') }}"
                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Cancel
+                    Annuler
                 </a>
-                <button type="submit" 
+                <button type="submit" id="submit-button"
                         class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <i class="fas fa-save mr-2"></i>
-                    Save Changes
+                    <span id="button-text">
+                        <i class="fas fa-save mr-2"></i>
+                        Enregistrer les Modifications
+                    </span>
+                    <span id="button-loading" class="hidden">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="ml-2">Enregistrement...</span>
+                    </span>
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Image Preview Handler -->
 <script>
 function previewImage(input) {
     const preview = document.getElementById('preview-image');
     const defaultPhoto = document.getElementById('default-photo');
-    
+
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-        
+
         reader.onload = function(e) {
             if (preview) {
                 preview.src = e.target.result;
@@ -153,66 +253,227 @@ function previewImage(input) {
                 defaultPhoto.classList.add('hidden');
             }
         }
-        
+
         reader.readAsDataURL(input.files[0]);
     }
 }
+</script>
 
-function getCurrentLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                const pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
+<!-- Phone Numbers Management -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('phone-numbers-container');
+    const addButton = document.getElementById('add-phone-btn');
+    let phoneCount = document.querySelectorAll('.phone-field').length;
+    const maxPhones = 4;
 
-                // Update map if it exists
-                if (window.map && window.marker) {
-                    window.map.setCenter(pos);
-                    window.marker.setPosition(pos);
-                    // Reverse geocode to get address
-                    const geocoder = new google.maps.Geocoder();
-                    geocoder.geocode({ location: pos }, (results, status) => {
-                        if (status === 'OK' && results[0]) {
-                            document.getElementById('location').value = results[0].formatted_address;
-                        } else {
-                            // If geocoding fails, just use coordinates
-                            document.getElementById('location').value = `${pos.lat}, ${pos.lng}`;
-                        }
-                    });
-                } else {
-                    // If map isn't available, just use coordinates
-                    document.getElementById('location').value = `${pos.lat}, ${pos.lng}`;
-                }
-            },
-            function(error) {
-                let errorMessage;
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage = "Location access was denied. Please enter location manually.";
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = "Location information is unavailable. Please enter location manually.";
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage = "Location request timed out. Please enter location manually.";
-                        break;
-                    default:
-                        errorMessage = "An unknown error occurred. Please enter location manually.";
-                        break;
-                }
-                alert(errorMessage);
-            },
-            {
-                maximumAge: 60000,
-                timeout: 5000,
-                enableHighAccuracy: true
-            }
-        );
-    } else {
-        alert("Geolocation is not supported by this browser. Please enter location manually.");
+    const phoneTypes = {
+        2: { name: 'secondary', label: 'Secondary' },
+        3: { name: 'third', label: 'Third' },
+        4: { name: 'fourth', label: 'Fourth' }
+    };
+
+    // Update add button visibility based on initial phone count
+    if (phoneCount >= maxPhones) {
+        addButton.style.display = 'none';
     }
-}
+
+    function createPhoneField(index) {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'phone-field relative';
+
+        const phoneType = phoneTypes[index];
+
+        fieldDiv.innerHTML = `
+            <div class="flex items-center space-x-2">
+                <div class="flex-grow">
+                    <label for="phone_${phoneType.name}" class="block text-sm font-medium text-gray-700">
+                        ${phoneType.label} Phone Number
+                    </label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input type="tel"
+                               id="phone_${phoneType.name}"
+                               name="phone_${phoneType.name}"
+                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Enter ${phoneType.label.toLowerCase()} phone number">
+                    </div>
+                </div>
+                <button type="button" class="remove-phone-btn mt-6 text-red-600 hover:text-red-800">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(fieldDiv);
+
+        // Add remove button handler
+        fieldDiv.querySelector('.remove-phone-btn').addEventListener('click', function() {
+            fieldDiv.remove();
+            phoneCount--;
+            addButton.style.display = 'inline-flex';
+        });
+    }
+
+    // Add existing remove button handlers
+    document.querySelectorAll('.remove-phone-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.phone-field').remove();
+            phoneCount--;
+            addButton.style.display = 'inline-flex';
+        });
+    });
+
+    addButton.addEventListener('click', function() {
+        if (phoneCount < maxPhones) {
+            phoneCount++;
+            createPhoneField(phoneCount);
+
+            if (phoneCount >= maxPhones) {
+                addButton.style.display = 'none';
+            }
+        }
+    });
+});
+</script>
+
+<!-- Social Media Management -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const socialContainer = document.getElementById('additional-social-media');
+    const addSocialBtn = document.getElementById('add-social-btn');
+
+    const socialMediaOptions = [
+        { id: 'facebook', name: 'Facebook', icon: 'fa-facebook', color: 'text-blue-600' },
+        { id: 'linkedin', name: 'LinkedIn', icon: 'fa-linkedin', color: 'text-blue-700' },
+        { id: 'youtube', name: 'YouTube', icon: 'fa-youtube', color: 'text-red-600' },
+        { id: 'tiktok', name: 'TikTok', icon: 'fa-tiktok', color: 'text-gray-900' },
+        { id: 'twitter', name: 'Twitter', icon: 'fa-twitter', color: 'text-blue-400' },
+        { id: 'snapchat', name: 'Snapchat', icon: 'fa-snapchat-ghost', color: 'text-yellow-400' }
+    ];
+
+    let addedSocials = new Set([
+        {% if card.facebook %}'facebook',{% endif %}
+        {% if card.linkedin %}'linkedin',{% endif %}
+        {% if card.twitter %}'twitter',{% endif %}
+        {% if card.snapchat %}'snapchat',{% endif %}
+        {% if card.youtube %}'youtube',{% endif %}
+        {% if card.tiktok %}'tiktok'{% endif %}
+    ].filter(Boolean));
+
+    function createSocialMediaSelector() {
+        const availableSocials = socialMediaOptions.filter(social => !addedSocials.has(social.id));
+
+        if (availableSocials.length === 0) {
+            addSocialBtn.style.display = 'none';
+            return;
+        }
+
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'relative flex items-center space-x-2';
+
+        const selectHTML = `
+            <div class="flex-grow">
+                <select class="social-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Select Platform</option>
+                    ${availableSocials.map(social => `
+                        <option value="${social.id}"
+                                data-icon="${social.icon}"
+                                data-color="${social.color}">
+                            ${social.name}
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+        `;
+
+        fieldDiv.innerHTML = selectHTML;
+        socialContainer.appendChild(fieldDiv);
+
+        const select = fieldDiv.querySelector('.social-select');
+        select.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const socialId = this.value;
+
+            if (socialId) {
+                const social = socialMediaOptions.find(s => s.id === socialId);
+                addedSocials.add(socialId);
+
+                const inputField = document.createElement('div');
+                inputField.className = 'relative flex items-center space-x-2';
+                inputField.innerHTML = `
+                    <div class="flex-grow">
+                        <label for="${social.id}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab ${social.icon} mr-2 ${social.color}"></i>${social.name}
+                        </label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input type="text" id="${social.id}" name="${social.id}"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                   placeholder="Enter ${social.name} profile link">
+                        </div>
+                    </div>
+                    <button type="button" class="remove-social-btn mt-6 text-red-600 hover:text-red-800">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                `;
+
+                fieldDiv.replaceWith(inputField);
+
+                inputField.querySelector('.remove-social-btn').addEventListener('click', function() {
+                    addedSocials.delete(socialId);
+                    inputField.remove();
+                    addSocialBtn.style.display = 'inline-flex';
+                });
+            }
+        });
+    }
+
+    // Add remove button handlers for existing social media fields
+    document.querySelectorAll('.remove-social-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const field = this.closest('.relative');
+            const socialId = field.querySelector('input').id;
+            addedSocials.delete(socialId);
+            field.remove();
+            addSocialBtn.style.display = 'inline-flex';
+        });
+    });
+
+    addSocialBtn.addEventListener('click', createSocialMediaSelector);
+
+    // Hide add button if all socials are already added
+    if (addedSocials.size >= socialMediaOptions.length) {
+        addSocialBtn.style.display = 'none';
+    }
+});
+</script>
+
+<!-- Form Submission Handler -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const buttonLoading = document.getElementById('button-loading');
+
+    function setLoading(isLoading) {
+        submitButton.disabled = isLoading;
+        if (isLoading) {
+            buttonText.classList.add('hidden');
+            buttonLoading.classList.remove('hidden');
+        } else {
+            buttonText.classList.remove('hidden');
+            buttonLoading.classList.add('hidden');
+        }
+    }
+
+    form.addEventListener('submit', function(e) {
+        setLoading(true);
+        // Form will submit normally, no need to prevent default
+    });
+});
 </script>
 {% endblock %}

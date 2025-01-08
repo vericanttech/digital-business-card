@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeLocationInput(input) {
     // Helper text element
-    const helperText = document.createElement('p');
-    helperText.className = 'mt-1 text-sm text-gray-500';
-    helperText.textContent = 'Share your location from Google Maps (e.g., https://maps.app.goo.gl/... or https://www.google.com/maps/...)';
-    input.parentNode.appendChild(helperText);
+    //const helperText = document.createElement('p');
+    //helperText.className = 'mt-1 text-sm text-gray-500';
+    //helperText.textContent = 'Share your location from Google Maps (e.g., https://maps.app.goo.gl/... or https://www.google.com/maps/...)';
+    //input.parentNode.appendChild(helperText);
 
     // Update placeholder
     input.placeholder = 'Paste your Google Maps share link';
