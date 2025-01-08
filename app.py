@@ -14,9 +14,20 @@ import json
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__)
+""""app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False"""
+
+load_dotenv()
+print("Database URL:", os.getenv('DATABASE_URL'))
+print("Secret Key:", os.getenv('FLASK_SECRET_KEY'))
+app = Flask(__name__)
+app.config['SECRET_KEY'] = '23eea57342560ce4c7e0a2c9884c1714'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                                     'business_cards.db')
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/photos')
+app.static_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
