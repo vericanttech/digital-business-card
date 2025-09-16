@@ -4,7 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -20,29 +19,68 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual Environment
 venv/
+env/
 ENV/
+env.bak/
+venv.bak/
 
-migrations/__pycache__/
-migrations/versions/__pycache__/
-*.pyc
-
-# Add this to .gitignore
-.env
-
-# Flask
-instance/
-.webassets-cache
+# Database
 *.db
+*.sqlite
+*.sqlite3
 
-# IDEs
-.idea/
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
 .vscode/
+.idea/
 *.swp
 *.swo
+*~
 
-# Project specific
-static/photos/*
-!static/photos/.gitkeep
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files
+test_*.py
+*_test.py
+
+# Helper scripts (exclude these)
+create_admin.py
+migrate_add_admin_field.py
+setup_db.py
+update_db.py
+test_*.py
+
+# Migration files (keep only essential ones)
+migrations/versions/
+migrations/__pycache__/
+
+# Documentation files that aren't needed
+app-changes.md
+QR_Pro_Creator_Developer_Brief.pdf
+updated-wrapper.jpg
+
+# User uploaded photos (keep structure but not actual files)
+static/photos/*.jpg
+static/photos/*.jpeg
+static/photos/*.png

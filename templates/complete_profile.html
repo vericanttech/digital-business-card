@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Complétez Votre Profil</h1>
+                <p class="text-gray-600">Configurons votre profil QR code personnel</p>
+            </div>
+
+            <!-- Profile Form -->
+            <form method="POST" class="space-y-6">
+                <!-- Basic Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                        <input type="text" id="first_name" name="first_name" value="{{ current_user.first_name }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" readonly>
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Nom de famille</label>
+                        <input type="text" id="last_name" name="last_name" value="{{ current_user.last_name }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
+                    <input type="email" id="email" name="email" value="{{ current_user.email }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" readonly>
+                </div>
+
+                <div>
+                    <label for="profession" class="block text-sm font-medium text-gray-700 mb-2">Profession ou Titre</label>
+                    <input type="text" id="profession" name="profession" placeholder="ex: Ingénieur Logiciel, Responsable Marketing" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Numéro de Téléphone <span class="text-red-600">*</span></label>
+                    <input type="tel" id="phone" name="phone" placeholder="+33 1 23 45 67 89" 
+                           required inputmode="tel"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+
+                <div>
+                    <label for="biography" class="block text-sm font-medium text-gray-700 mb-2">Biographie Courte</label>
+                    <textarea id="biography" name="biography" rows="4" placeholder="Parlez-nous un peu de vous..." 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                </div>
+
+                <!-- Social Media Links -->
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Liens des Réseaux Sociaux</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="linkedin" class="block text-sm font-medium text-gray-700 mb-2">LinkedIn</label>
+                            <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/votreprofil" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-2">WhatsApp</label>
+                            <input type="tel" id="whatsapp" name="whatsapp" placeholder="+33 1 23 45 67 89" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label for="instagram" class="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
+                            <input type="url" id="instagram" name="instagram" placeholder="https://instagram.com/votreprofil" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end pt-6">
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Compléter le Profil
+                        <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -33,6 +33,58 @@ class Admin(UserMixin, db.Model):
         return str(self.id)
 
 
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    google_id = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    profile_picture = db.Column(db.String(200))
+    
+    # Profile information
+    profession = db.Column(db.String(100))
+    phone = db.Column(db.String(20))  # Primary phone
+    phone_secondary = db.Column(db.String(20))
+    phone_third = db.Column(db.String(20))
+    phone_fourth = db.Column(db.String(20))
+    biography = db.Column(db.Text)
+    
+    # Location information
+    address = db.Column(db.String(200))
+    location = db.Column(db.String(200))  # Google Maps link
+    
+    # Review link
+    review_link = db.Column(db.String(200))
+    
+    # Social media links
+    linkedin = db.Column(db.String(200))
+    whatsapp = db.Column(db.String(200))
+    instagram = db.Column(db.String(200))
+    twitter = db.Column(db.String(200))
+    snapchat = db.Column(db.String(200))
+    facebook = db.Column(db.String(200))
+    youtube = db.Column(db.String(200))
+    tiktok = db.Column(db.String(200))
+    
+    # Profile URL slug
+    profile_slug = db.Column(db.String(100), unique=True)
+    
+    # Admin status
+    is_admin = db.Column(db.Boolean, default=False)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def get_id(self):
+        return str(self.id)
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+
 class BusinessCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

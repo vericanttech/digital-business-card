@@ -8,13 +8,13 @@
                 <!-- Profile Header -->
                 <div class="relative h-32 bg-gradient-to-r from-[#F15A22] to-[#F15A22]/80">
                     <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-                        {% if user.photo_path %}
-                        <img src="{{ url_for('static', filename=user.photo_path) }}"
-                             alt="{{ user.name }}"
+                        {% if user.profile_picture %}
+                        <img src="{{ url_for('static', filename=user.profile_picture) }}"
+                             alt="{{ user.get_full_name() }}"
                              class="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg">
                         {% else %}
                         <div class="w-24 h-24 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-user text-3xl text-gray-400"></i>
+                            <span class="text-3xl font-bold text-gray-400">{{ user.first_name[0] }}{{ user.last_name[0] }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -23,20 +23,22 @@
                 <!-- Profile Info -->
                 <div class="pt-16 px-6 pb-6">
                     <div class="text-center">
-                        <h1 class="text-2xl font-bold text-gray-900">{{ user.name }}</h1>
-                        <p class="text-blue-600 font-medium mt-1">{{ user.title }}</p>
+                        <h1 class="text-2xl font-bold text-gray-900">{{ user.get_full_name() }}</h1>
+                        {% if user.profession %}
+                        <p class="text-blue-600 font-medium mt-1">{{ user.profession }}</p>
+                        {% endif %}
                     </div>
 
                     <!-- Contact Information -->
                     <div class="mt-6 space-y-4">
                         <!-- Primary Phone -->
-                        {% if user.phone_primary %}
+                        {% if user.phone %}
                         <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
                             <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#F15A22]/10 text-[#F15A22]">
                                 <i class="fas fa-phone"></i>
                             </div>
-                            <a href="tel:{{ user.phone_primary }}" class="ml-3 text-gray-700 hover:text-blue-600 transition">
-                                {{ user.phone_primary }} (Principal)
+                            <a href="tel:{{ user.phone }}" class="ml-3 text-gray-700 hover:text-blue-600 transition">
+                                {{ user.phone }} (Principal)
                             </a>
                         </div>
                         {% endif %}
@@ -87,16 +89,19 @@
                             </a>
                         </div>
 
-                        <!-- Location -->
+                        <!-- Address -->
+                        {% if user.address %}
                         <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
                             <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#F15A22]/10 text-[#F15A22]">
                                 <i class="fas fa-map-marker-alt"></i>
                             </div>
                             <span class="ml-3 text-gray-700">{{ user.address }}</span>
                         </div>
+                        {% endif %}
                     </div>
 
                     <!-- Map -->
+                    {% if user.location %}
                     <div class="mt-6">
                         <a href="{{ user.location }}" target="_blank"
                            class="w-full flex items-center justify-center px-4 py-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition duration-200">
@@ -106,6 +111,7 @@
                             <span class="text-blue-600 font-medium">Naviguer vers l'emplacement</span>
                         </a>
                     </div>
+                    {% endif %}
 
                     <!-- Review Link -->
                     {% if user.review_link %}
@@ -120,67 +126,71 @@
                     </div>
                     {% endif %}
 
+                    <!-- Biography -->
+                    {% if user.biography %}
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">À propos</h3>
+                        <p class="text-gray-700 leading-relaxed">{{ user.biography }}</p>
+                    </div>
+                    {% endif %}
+
                     <!-- Social Media Links -->
                     <div class="mt-6 flex justify-center space-x-4">
-                        <!-- Social media links remain unchanged as they are brand names -->
                         {% if user.instagram %}
-                        <a href="https://instagram.com/{{ user.instagram }}" target="_blank"
+                        <a href="{{ user.instagram }}" target="_blank"
                            class="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 text-white hover:opacity-90 transition">
                             <i class="fab fa-instagram"></i>
                         </a>
                         {% endif %}
 
                         {% if user.whatsapp %}
-                        <a href="https://wa.me/{{ user.whatsapp }}" target="_blank"
+                        <a href="https://wa.me/{{ user.whatsapp.replace('+', '').replace(' ', '').replace('-', '').replace('(', '').replace(')', '') }}" target="_blank"
                            class="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:opacity-90 transition">
                             <i class="fab fa-whatsapp"></i>
                         </a>
                         {% endif %}
 
                         {% if user.facebook %}
-                        <a href="https://facebook.com/{{ user.facebook }}" target="_blank"
+                        <a href="{{ user.facebook }}" target="_blank"
                            class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white hover:opacity-90 transition">
                             <i class="fab fa-facebook-f"></i>
                         </a>
                         {% endif %}
 
                         {% if user.linkedin %}
-                            <a href="https://linkedin.com/in/{{ user.linkedin }}" target="_blank"
-                               class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 text-white">
-                               <i class="fab fa-linkedin"></i>
-                            </a>
-
+                        <a href="{{ user.linkedin }}" target="_blank"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-700 text-white hover:opacity-90 transition">
+                           <i class="fab fa-linkedin"></i>
+                        </a>
                         {% endif %}
 
                         {% if user.twitter %}
-                            <a href="https://twitter.com/{{ user.twitter }}" target="_blank"
-                               class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 text-white hover:bg-gray-700 transition">
-                               <i class="fab fa-x-twitter"></i>  <!-- Use `fa-x-twitter` for the new X logo -->
-                            </a>
+                        <a href="{{ user.twitter }}" target="_blank"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-400 text-white hover:opacity-90 transition">
+                           <i class="fab fa-x-twitter"></i>
+                        </a>
                         {% endif %}
 
                         {% if user.youtube %}
-                        <a href="https://youtube.com/{{ user.youtube }}" target="_blank"
+                        <a href="{{ user.youtube }}" target="_blank"
                            class="w-10 h-10 flex items-center justify-center rounded-full bg-red-600 text-white hover:opacity-90 transition">
                             <i class="fab fa-youtube"></i>
                         </a>
                         {% endif %}
 
                         {% if user.tiktok %}
-                        <a href="https://tiktok.com/@{{ user.tiktok }}" target="_blank"
-                           class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 text-white hover:bg-gray-700 transition">
+                        <a href="{{ user.tiktok }}" target="_blank"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:opacity-90 transition">
                            <i class="fab fa-tiktok"></i>
                         </a>
                         {% endif %}
 
                         {% if user.snapchat %}
-                        <a href="https://snapchat.com/add/{{ user.snapchat }}" target="_blank"
+                        <a href="{{ user.snapchat }}" target="_blank"
                            class="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-400 text-white hover:opacity-90 transition">
                             <i class="fab fa-snapchat-ghost"></i>
                         </a>
                         {% endif %}
-
-                        <!-- Other social media links remain the same -->
                     </div>
                 </div>
             </div>
@@ -202,8 +212,10 @@
                         <h2 class="text-lg font-semibold text-gray-900 mb-4">Partager la Carte</h2>
                         <div class="flex flex-col items-center justify-center mb-6">
                             <div id="qrcode" class="mb-2"></div>
-                            <p class="text-base font-medium text-gray-900 mt-2">{{ user.name }}</p>
-                            <p class="text-sm text-gray-500">{{ user.title }}</p>
+                            <p class="text-base font-medium text-gray-900 mt-2">{{ user.get_full_name() }}</p>
+                            {% if user.profession %}
+                            <p class="text-sm text-gray-500">{{ user.profession }}</p>
+                            {% endif %}
                         </div>
                         <div class="space-y-3">
                             <button onclick="handlePrintQR()"
@@ -220,7 +232,7 @@
                             </div>
                             <h2 class="text-xl font-semibold text-gray-900 mb-2">Enregistrer le Contact</h2>
                             <p class="text-gray-600 mb-4">
-                                Téléchargez les coordonnées de {{ user.name }} directement sur votre téléphone en un clic.
+                                Téléchargez les coordonnées de {{ user.get_full_name() }} directement sur votre téléphone en un clic.
                             </p>
                         </div>
                     {% endif %}
@@ -311,8 +323,10 @@
                         ${document.getElementById('qrcode').innerHTML}
                     </div>
                     <div class="info">
-                        <h2 style="margin: 0;">${'{{ user.name }}'}</h2>
-                        <p style="margin: 5px 0; color: #666;">${'{{ user.title }}'}</p>
+                        <h2 style="margin: 0;">${'{{ user.get_full_name() }}'}</h2>
+                        {% if user.profession %}
+                        <p style="margin: 5px 0; color: #666;">${'{{ user.profession }}'}</p>
+                        {% endif %}
                     </div>
                 </div>
             </body>
@@ -350,7 +364,7 @@
 <script>
     async function getImageFromExistingImg() {
         return new Promise((resolve) => {
-            const existingImg = document.querySelector('img[alt="{{ user.name }}"]');
+            const existingImg = document.querySelector('img[alt="{{ user.get_full_name() }}"]');
             if (!existingImg) {
                 console.error('Could not find existing image');
                 resolve(null);
@@ -404,7 +418,7 @@
             let photoData = '';
             let imageType = 'JPEG';
 
-            {% if user.photo_path %}
+            {% if user.profile_picture %}
             try {
                 console.log('Getting photo from existing image element');
                 const imageResult = await getImageFromExistingImg();
@@ -421,7 +435,7 @@
 
             // Format phone numbers
             const phones = {
-                primary: '{{ user.phone_primary }}',
+                primary: '{{ user.phone }}',
                 secondary: '{{ user.phone_secondary }}',
                 third: '{{ user.phone_third }}',
                 fourth: '{{ user.phone_fourth }}'
@@ -431,24 +445,24 @@
             const vCardContent = [
                 'BEGIN:VCARD',
                 'VERSION:3.0',
-                `FN:${'{{ user.name }}'}`,
-                `TITLE:${'{{ user.title }}'}`,
+                `FN:${'{{ user.get_full_name() }}'}`,
+                {% if user.profession %}`TITLE:${'{{ user.profession }}'}`,{% endif %}
                 phones.primary ? `TEL;type=CELL;type=pref:${phones.primary.replace(/[^\d+]/g, '')}` : '',
                 phones.secondary ? `TEL;type=CELL;type=home:${phones.secondary.replace(/[^\d+]/g, '')}` : '',
                 phones.third ? `TEL;type=CELL;type=work:${phones.third.replace(/[^\d+]/g, '')}` : '',
                 phones.fourth ? `TEL;type=CELL;type=other:${phones.fourth.replace(/[^\d+]/g, '')}` : '',
                 `EMAIL:${'{{ user.email }}'}`,
                 `URL:${window.location.href}`,
-                {% if user.location %}`ADR;type=WORK:;;${'{{ user.location }}'};;;`,{% endif %}
+                {% if user.address %}`ADR;type=WORK:;;${'{{ user.address }}'};;;`,{% endif %}
                 photoData ? `PHOTO;ENCODING=BASE64;TYPE=${imageType}:${photoData}` : '',
-                {% if user.instagram %}`X-SOCIALPROFILE;type=instagram:https://instagram.com/${'{{ user.instagram }}'}`,{% endif %}
-                {% if user.whatsapp %}`X-SOCIALPROFILE;type=whatsapp:https://wa.me/${'{{ user.whatsapp }}'}`,{% endif %}
-                {% if user.facebook %}`X-SOCIALPROFILE;type=facebook:https://facebook.com/${'{{ user.facebook }}'}`,{% endif %}
-                {% if user.linkedin %}`X-SOCIALPROFILE;type=linkedin:https://linkedin.com/in/${'{{ user.linkedin }}'}`,{% endif %}
-                {% if user.twitter %}`X-SOCIALPROFILE;type=twitter:https://twitter.com/${'{{ user.twitter }}'}`,{% endif %}
-                {% if user.youtube %}`X-SOCIALPROFILE;type=youtube:https://youtube.com/${'{{ user.youtube }}'}`,{% endif %}
-                {% if user.tiktok %}`X-SOCIALPROFILE;type=tiktok:https://tiktok.com/@${'{{ user.tiktok }}'}`,{% endif %}
-                {% if user.snapchat %}`X-SOCIALPROFILE;type=snapchat:https://snapchat.com/add/${'{{ user.snapchat }}'}`,{% endif %}
+                {% if user.instagram %}`X-SOCIALPROFILE;type=instagram:${'{{ user.instagram }}'}`,{% endif %}
+                {% if user.whatsapp %}`X-SOCIALPROFILE;type=whatsapp:https://wa.me/${'{{ user.whatsapp }}'.replace(/[^\d+]/g, '')}`,{% endif %}
+                {% if user.facebook %}`X-SOCIALPROFILE;type=facebook:${'{{ user.facebook }}'}`,{% endif %}
+                {% if user.linkedin %}`X-SOCIALPROFILE;type=linkedin:${'{{ user.linkedin }}'}`,{% endif %}
+                {% if user.twitter %}`X-SOCIALPROFILE;type=twitter:${'{{ user.twitter }}'}`,{% endif %}
+                {% if user.youtube %}`X-SOCIALPROFILE;type=youtube:${'{{ user.youtube }}'}`,{% endif %}
+                {% if user.tiktok %}`X-SOCIALPROFILE;type=tiktok:${'{{ user.tiktok }}'}`,{% endif %}
+                {% if user.snapchat %}`X-SOCIALPROFILE;type=snapchat:${'{{ user.snapchat }}'}`,{% endif %}
                 'END:VCARD'
             ].filter(Boolean).join('\n');
 
@@ -457,7 +471,7 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `${'{{ user.name }}'.replace(/\s+/g, '_')}_card.vcf`;
+            link.download = `${'{{ user.get_full_name() }}'.replace(/\s+/g, '_')}_card.vcf`;
 
             document.body.appendChild(link);
             link.click();
@@ -473,4 +487,4 @@
         }
     }
 </script>
-{% endblock %}
+{% endblock %} 

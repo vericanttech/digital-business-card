@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion des Administrateurs - QR Pro Creator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favcon.svg') }}">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="mb-4">
+                    <a href="{{ url_for('index') }}" class="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Retour à l'accueil
+                    </a>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Gestion des Administrateurs</h1>
+                <p class="text-gray-600">Gérez les privilèges d'administration des utilisateurs</p>
+            </div>
+
+            <!-- Navigation removed per requirements -->
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-green-100 border border-green-400 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% if not authenticated %}
+                <!-- Password Form -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Authentification Requise</h2>
+                    <form method="POST" class="space-y-4">
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                Mot de passe administrateur
+                            </label>
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Entrez le mot de passe">
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-orange-600 text-black py-2 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-200">
+                            Se connecter
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <!-- Users List -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800">Liste des Utilisateurs</h2>
+                        <p class="text-sm text-gray-600 mt-1">Cliquez pour voir les détails et changer le statut d'administrateur</p>
+                    </div>
+
+                    {% if users %}
+                        <!-- Desktop table -->
+                        <div class="overflow-x-auto hidden md:block">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'inscription</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for user in users %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                {% if user.profile_picture %}
+                                                    <img class="h-10 w-10 rounded-full object-cover" src="{{ url_for('static', filename=user.profile_picture) }}" alt="{{ user.get_full_name() }}">
+                                                {% else %}
+                                                    <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                        <span class="text-gray-600 font-medium">{{ user.first_name[0] }}{{ user.last_name[0] }}</span>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{ user.get_full_name() }}</div>
+                                                    <div class="text-sm text-gray-500">ID: {{ user.id }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.email }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.created_at.strftime('%d/%m/%Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {% if user.is_admin %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {% if user.is_admin %}Administrateur{% else %}Utilisateur{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                                            <button type="button"
+                                                    class="text-black hover:text-black font-medium user-view-btn"
+                                                    data-id="{{ user.id }}"
+                                                    data-first-name="{{ user.first_name|e }}"
+                                                    data-last-name="{{ user.last_name|e }}"
+                                                    data-email="{{ user.email|e }}"
+                                                    data-profile-picture="{{ user.profile_picture or '' }}"
+                                                    data-is-admin="{{ 'true' if user.is_admin else 'false' }}"
+                                                    data-created-at="{{ user.created_at.isoformat() if user.created_at else '' }}"
+                                                    data-profession="{{ user.profession or '' | e }}"
+                                                    data-phone="{{ user.phone or '' | e }}"
+                                                    data-phone-secondary="{{ user.phone_secondary or '' | e }}"
+                                                    data-phone-third="{{ user.phone_third or '' | e }}"
+                                                    data-phone-fourth="{{ user.phone_fourth or '' | e }}"
+                                                    data-biography="{{ user.biography or '' | e }}"
+                                                    data-address="{{ user.address or '' | e }}"
+                                                    data-location="{{ user.location or '' | e }}"
+                                                    data-review-link="{{ user.review_link or '' | e }}"
+                                                    data-linkedin="{{ user.linkedin or '' | e }}"
+                                                    data-whatsapp="{{ user.whatsapp or '' | e }}"
+                                                    data-instagram="{{ user.instagram or '' | e }}"
+                                                    data-twitter="{{ user.twitter or '' | e }}"
+                                                    data-snapchat="{{ user.snapchat or '' | e }}"
+                                                    data-facebook="{{ user.facebook or '' | e }}"
+                                                    data-youtube="{{ user.youtube or '' | e }}"
+                                                    data-tiktok="{{ user.tiktok or '' | e }}"
+                                                    data-profile-slug="{{ user.profile_slug or '' | e }}">
+                                                Voir
+                                            </button>
+                                            <form method="POST" action="{{ url_for('toggle_admin', user_id=user.id) }}" class="inline">
+                                                <input type="hidden" name="password" value="Alaamin123">
+                                                <button type="submit" class="text-black hover:text-black font-medium transition duration-200">
+                                                    {% if user.is_admin %}Retirer admin{% else %}Rendre admin{% endif %}
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile cards -->
+                        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+                            {% for user in users %}
+                            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                                <div class="flex items-center">
+                                    {% if user.profile_picture %}
+                                        <img class="h-12 w-12 rounded-full object-cover" src="{{ url_for('static', filename=user.profile_picture) }}" alt="{{ user.get_full_name() }}">
+                                    {% else %}
+                                        <div class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <span class="text-gray-600 font-medium">{{ user.first_name[0] }}{{ user.last_name[0] }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="ml-3">
+                                        <h3 class="text-base font-semibold text-gray-900">{{ user.get_full_name() }}</h3>
+                                        <p class="text-sm text-gray-600">{{ user.email }}</p>
+                                    </div>
+                                    <span class="ml-auto inline-flex px-2 py-1 text-xs font-semibold rounded-full {% if user.is_admin %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {% if user.is_admin %}Admin{% else %}Utilisateur{% endif %}
+                                    </span>
+                                </div>
+                                <div class="mt-3 text-xs text-gray-500">Inscrit le {{ user.created_at.strftime('%d/%m/%Y') }}</div>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <button type="button"
+                                            class="inline-flex items-center px-3 py-1.5 text-sm bg-orange-600 text-black rounded-md hover:bg-orange-700 user-view-btn"
+                                            data-id="{{ user.id }}"
+                                            data-first-name="{{ user.first_name|e }}"
+                                            data-last-name="{{ user.last_name|e }}"
+                                            data-email="{{ user.email|e }}"
+                                            data-profile-picture="{{ user.profile_picture or '' }}"
+                                            data-is-admin="{{ 'true' if user.is_admin else 'false' }}"
+                                            data-created-at="{{ user.created_at.isoformat() if user.created_at else '' }}"
+                                            data-profession="{{ user.profession or '' | e }}"
+                                            data-phone="{{ user.phone or '' | e }}"
+                                            data-phone-secondary="{{ user.phone_secondary or '' | e }}"
+                                            data-phone-third="{{ user.phone_third or '' | e }}"
+                                            data-phone-fourth="{{ user.phone_fourth or '' | e }}"
+                                            data-biography="{{ user.biography or '' | e }}"
+                                            data-address="{{ user.address or '' | e }}"
+                                            data-location="{{ user.location or '' | e }}"
+                                            data-review-link="{{ user.review_link or '' | e }}"
+                                            data-linkedin="{{ user.linkedin or '' | e }}"
+                                            data-whatsapp="{{ user.whatsapp or '' | e }}"
+                                            data-instagram="{{ user.instagram or '' | e }}"
+                                            data-twitter="{{ user.twitter or '' | e }}"
+                                            data-snapchat="{{ user.snapchat or '' | e }}"
+                                            data-facebook="{{ user.facebook or '' | e }}"
+                                            data-youtube="{{ user.youtube or '' | e }}"
+                                            data-tiktok="{{ user.tiktok or '' | e }}"
+                                            data-profile-slug="{{ user.profile_slug or '' | e }}">
+                                        <i class="fas fa-eye mr-2"></i>Voir
+                                    </button>
+                                    <form method="POST" action="{{ url_for('toggle_admin', user_id=user.id) }}" class="inline">
+                                        <input type="hidden" name="password" value="Alaamin123">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-md text-black bg-white hover:bg-gray-50">
+                                            {% if user.is_admin %}Retirer admin{% else %}Rendre admin{% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="px-6 py-8 text-center">
+                            <p class="text-gray-500">Aucun utilisateur trouvé.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- No navigation links -->
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userDetailsModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i class="fas fa-user text-orange-600"></i>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Détails de l'utilisateur</h3>
+                        <div class="mt-4 space-y-3" id="userDetailsContent"></div>
+                    </div>
+                </div>
+                <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="closeUserDetails()" class="w-full inline-flex justify-center rounded-md shadow-sm px-4 py-2 bg-orange-600 text-base font-semibold text-black hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Delegate clicks and read data-* attributes
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.user-view-btn');
+        if (!btn) return;
+        const user = {
+            id: btn.getAttribute('data-id'),
+            first_name: btn.getAttribute('data-first-name') || '',
+            last_name: btn.getAttribute('data-last-name') || '',
+            email: btn.getAttribute('data-email') || '',
+            profile_picture: btn.getAttribute('data-profile-picture') || '',
+            is_admin: btn.getAttribute('data-is-admin') === 'true',
+            created_at: btn.getAttribute('data-created-at') || '',
+            profession: btn.getAttribute('data-profession') || '',
+            phone: btn.getAttribute('data-phone') || '',
+            phone_secondary: btn.getAttribute('data-phone-secondary') || '',
+            phone_third: btn.getAttribute('data-phone-third') || '',
+            phone_fourth: btn.getAttribute('data-phone-fourth') || '',
+            biography: btn.getAttribute('data-biography') || '',
+            address: btn.getAttribute('data-address') || '',
+            location: btn.getAttribute('data-location') || '',
+            review_link: btn.getAttribute('data-review-link') || '',
+            linkedin: btn.getAttribute('data-linkedin') || '',
+            whatsapp: btn.getAttribute('data-whatsapp') || '',
+            instagram: btn.getAttribute('data-instagram') || '',
+            twitter: btn.getAttribute('data-twitter') || '',
+            snapchat: btn.getAttribute('data-snapchat') || '',
+            facebook: btn.getAttribute('data-facebook') || '',
+            youtube: btn.getAttribute('data-youtube') || '',
+            tiktok: btn.getAttribute('data-tiktok') || '',
+            profile_slug: btn.getAttribute('data-profile-slug') || ''
+        };
+        showUserDetails(user);
+    });
+
+    function showUserDetails(user) {
+        const modal = document.getElementById('userDetailsModal');
+        const content = document.getElementById('userDetailsContent');
+        const staticBase = "{{ url_for('static', filename='') }}";
+        let imageSrc = null;
+        if (user.profile_picture) {
+            imageSrc = user.profile_picture.startsWith('http') ? user.profile_picture : staticBase + user.profile_picture;
+        }
+        const profileImg = imageSrc ? '<img src="' + imageSrc + '" class="h-20 w-20 rounded-full object-cover shadow mb-3" alt="' + (user.first_name || '') + ' ' + (user.last_name || '') + '">' : '';
+
+        const lines = [];
+        lines.push('<div class="flex items-center space-x-3">');
+        lines.push(profileImg);
+        lines.push('<div>');
+        lines.push('<p class="text-sm text-gray-500">ID: ' + (user.id ?? '') + '</p>');
+        lines.push('<p class="text-base font-semibold text-gray-900">' + (user.first_name || '') + ' ' + (user.last_name || '') + '</p>');
+        lines.push('</div>');
+        lines.push('</div>');
+        lines.push('<div class="grid grid-cols-1 gap-3 mt-4">');
+        lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Email:</span> ' + (user.email || '') + '</p>');
+        if (user.profession) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Profession:</span> ' + user.profession + '</p>');
+        if (user.phone) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Téléphone:</span> ' + user.phone + '</p>');
+        if (user.phone_secondary) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Téléphone 2:</span> ' + user.phone_secondary + '</p>');
+        if (user.phone_third) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Téléphone 3:</span> ' + user.phone_third + '</p>');
+        if (user.phone_fourth) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Téléphone 4:</span> ' + user.phone_fourth + '</p>');
+        if (user.address) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Adresse:</span> ' + user.address + '</p>');
+        if (user.location) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Localisation:</span> <a class="text-blue-600 hover:underline" href="' + user.location + '" target="_blank">Google Maps</a></p>');
+        if (user.review_link) lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Lien d\'avis:</span> <a class="text-blue-600 hover:underline" href="' + user.review_link + '" target="_blank">Ouvrir</a></p>');
+        lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Statut:</span> ' + (user.is_admin ? 'Administrateur' : 'Utilisateur') + '</p>');
+        lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Créé le:</span> ' + (user.created_at ? new Date(user.created_at).toLocaleDateString() : '') + '</p>');
+        const socials = [];
+        if (user.linkedin) socials.push('<a class="text-blue-700 hover:underline" href="' + user.linkedin + '" target="_blank">LinkedIn</a>');
+        if (user.whatsapp) socials.push('<a class="text-green-700 hover:underline" href="' + user.whatsapp + '" target="_blank">WhatsApp</a>');
+        if (user.instagram) socials.push('<a class="text-pink-700 hover:underline" href="' + user.instagram + '" target="_blank">Instagram</a>');
+        if (user.twitter) socials.push('<a class="text-blue-500 hover:underline" href="' + user.twitter + '" target="_blank">Twitter</a>');
+        if (user.snapchat) socials.push('<span>Snapchat</span>');
+        if (user.facebook) socials.push('<a class="text-blue-700 hover:underline" href="' + user.facebook + '" target="_blank">Facebook</a>');
+        if (user.youtube) socials.push('<a class="text-red-600 hover:underline" href="' + user.youtube + '" target="_blank">YouTube</a>');
+        if (user.tiktok) socials.push('<span>TikTok</span>');
+        if (socials.length) {
+            lines.push('<div class="text-sm text-gray-700"><span class="font-medium">Réseaux sociaux:</span> ' + socials.join(' • ') + '</div>');
+        }
+        if (user.profile_slug) {
+            const profileUrl = window.location.origin + '/pro/' + user.profile_slug;
+            lines.push('<p class="text-sm text-gray-700"><span class="font-medium">Profil public:</span> <a class="text-orange-700 hover:underline" target="_blank" href="' + profileUrl + '">Voir</a></p>');
+        }
+        if (user.biography) {
+            lines.push('<div class="pt-2 border-t"><p class="text-sm text-gray-700"><span class="font-medium">Bio:</span> ' + user.biography + '</p></div>');
+        }
+        lines.push('</div>');
+        content.innerHTML = lines.join('');
+
+        modal.classList.remove('hidden');
+    }
+    function closeUserDetails() {
+        const modal = document.getElementById('userDetailsModal');
+        modal.classList.add('hidden');
+    }
+    </script>
+</body>
+</html>

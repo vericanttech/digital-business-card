@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Return Button -->
+        <div class="mb-6">
+            <a href="{{ url_for('user_dashboard') }}" 
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Retour au tableau de bord
+            </a>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Modifier votre profil</h1>
+
+        <form action="{{ url_for('edit_profile') }}" method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+            <!-- Photo Upload Section -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Photo de profil</label>
+                <div class="flex flex-col items-center space-y-4">
+                    <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden" id="photo-preview">
+                        {% if current_user.profile_picture %}
+                            <img src="{{ url_for('static', filename=current_user.profile_picture) }}" alt="Photo de profil" class="w-full h-full object-cover" id="preview-image">
+                        {% else %}
+                            <svg class="h-16 w-16 text-gray-400" id="default-photo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        {% endif %}
+                    </div>
+                    <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Télécharger une photo
+                        <input type="file" id="photo" name="photo" accept="image/*" class="hidden" onchange="previewImage(this)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700">Prénom</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ current_user.first_name }}" 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700">Nom de famille</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ current_user.last_name }}" 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" value="{{ current_user.email }}" 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" readonly>
+                </div>
+
+                <div>
+                    <label for="profession" class="block text-sm font-medium text-gray-700">Profession ou titre</label>
+                    <input type="text" id="profession" name="profession" value="{{ current_user.profession or '' }}" 
+                           placeholder="ex: Ingénieur logiciel, Responsable marketing"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Phone Numbers Section -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-medium text-gray-900">Numéros de téléphone</h3>
+                <div id="phone-numbers-container" class="space-y-4">
+                    <!-- Primary Phone (Always visible) -->
+                    <div class="phone-field">
+                        <label for="phone" class="block text-sm font-medium text-gray-700">
+                            Numéro de téléphone principal
+                        </label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input type="tel" id="phone" name="phone" value="{{ current_user.phone or '' }}"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                   placeholder="Entrez votre numéro de téléphone principal">
+                        </div>
+                    </div>
+
+                    <!-- Secondary Phone -->
+                    {% if current_user.phone_secondary %}
+                    <div class="phone-field relative">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                            <div class="flex-grow">
+                                <label for="phone_secondary" class="block text-sm font-medium text-gray-700">
+                                    Numéro de téléphone secondaire
+                                </label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <input type="tel" id="phone_secondary" name="phone_secondary" value="{{ current_user.phone_secondary }}"
+                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                           placeholder="Entrez votre numéro de téléphone secondaire">
+                                </div>
+                            </div>
+                            <button type="button" class="remove-phone-btn mt-6 sm:mt-6 text-red-600 hover:text-red-800">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Third Phone -->
+                    {% if current_user.phone_third %}
+                    <div class="phone-field relative">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                            <div class="flex-grow">
+                                <label for="phone_third" class="block text-sm font-medium text-gray-700">
+                                    Troisième numéro de téléphone
+                                </label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <input type="tel" id="phone_third" name="phone_third" value="{{ current_user.phone_third }}"
+                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                           placeholder="Entrez votre troisième numéro de téléphone">
+                                </div>
+                            </div>
+                            <button type="button" class="remove-phone-btn mt-6 sm:mt-6 text-red-600 hover:text-red-800">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Fourth Phone -->
+                    {% if current_user.phone_fourth %}
+                    <div class="phone-field relative">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                            <div class="flex-grow">
+                                <label for="phone_fourth" class="block text-sm font-medium text-gray-700">
+                                    Quatrième numéro de téléphone
+                                </label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <input type="tel" id="phone_fourth" name="phone_fourth" value="{{ current_user.phone_fourth }}"
+                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                           placeholder="Entrez votre quatrième numéro de téléphone">
+                                </div>
+                            </div>
+                            <button type="button" class="remove-phone-btn mt-6 sm:mt-6 text-red-600 hover:text-red-800">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Add Phone Button -->
+                <button type="button" id="add-phone-btn"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ajouter un autre numéro de téléphone
+                </button>
+            </div>
+
+            <!-- Location Section -->
+            <div class="space-y-1">
+                <label for="address" class="block text-sm font-medium text-gray-700">Adresse</label>
+                <input type="text" name="address" id="address" value="{{ current_user.address or '' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                       placeholder="Entrez votre adresse">
+            </div>
+            <div class="mt-6">
+                <label for="location" class="block text-sm font-medium text-gray-700">Lien de localisation (Google Maps)</label>
+                <div class="mt-1">
+                    <input type="text" id="location" name="location" value="{{ current_user.location or '' }}"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Entrez le lien Google Maps">
+                </div>
+            </div>
+
+            <!-- Review Link Section -->
+            <div class="mt-6">
+                <label for="review_link" class="block text-sm font-medium text-gray-700">Lien d'avis</label>
+                <div class="mt-1">
+                    <input type="text" id="review_link" name="review_link" value="{{ current_user.review_link or '' }}"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Ajoutez un lien pour les avis">
+                </div>
+            </div>
+
+            <!-- Biography -->
+            <div>
+                <label for="biography" class="block text-sm font-medium text-gray-700">Biographie courte</label>
+                <textarea id="biography" name="biography" rows="4" placeholder="Parlez-nous un peu de vous..." 
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ current_user.biography or '' }}</textarea>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-medium text-gray-900">Liens des réseaux sociaux</h3>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <!-- Most common social media -->
+                    <div>
+                        <label for="whatsapp" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-whatsapp mr-2 text-green-500"></i>WhatsApp
+                        </label>
+                        <input type="text" id="whatsapp" name="whatsapp" value="{{ current_user.whatsapp or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Numéro WhatsApp ou lien">
+                    </div>
+
+                    <div>
+                        <label for="instagram" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-instagram mr-2 text-pink-500"></i>Instagram
+                        </label>
+                        <input type="text" id="instagram" name="instagram" value="{{ current_user.instagram or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Nom d'utilisateur Instagram ou lien de profil">
+                    </div>
+
+                    <div>
+                        <label for="linkedin" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-linkedin mr-2 text-blue-700"></i>LinkedIn
+                        </label>
+                        <input type="text" id="linkedin" name="linkedin" value="{{ current_user.linkedin or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Lien de profil LinkedIn">
+                    </div>
+
+                    <div>
+                        <label for="facebook" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-facebook mr-2 text-blue-600"></i>Facebook
+                        </label>
+                        <input type="text" id="facebook" name="facebook" value="{{ current_user.facebook or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Lien de profil Facebook">
+                    </div>
+
+                    <div>
+                        <label for="twitter" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-twitter mr-2 text-blue-400"></i>Twitter
+                        </label>
+                        <input type="text" id="twitter" name="twitter" value="{{ current_user.twitter or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Nom d'utilisateur Twitter ou lien de profil">
+                    </div>
+
+                    <div>
+                        <label for="youtube" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-youtube mr-2 text-red-600"></i>YouTube
+                        </label>
+                        <input type="text" id="youtube" name="youtube" value="{{ current_user.youtube or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Lien de chaîne YouTube">
+                    </div>
+
+                    <div>
+                        <label for="tiktok" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-tiktok mr-2 text-gray-900"></i>TikTok
+                        </label>
+                        <input type="text" id="tiktok" name="tiktok" value="{{ current_user.tiktok or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Nom d'utilisateur TikTok ou lien de profil">
+                    </div>
+
+                    <div>
+                        <label for="snapchat" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-snapchat-ghost mr-2 text-yellow-400"></i>Snapchat
+                        </label>
+                        <input type="text" id="snapchat" name="snapchat" value="{{ current_user.snapchat or '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Nom d'utilisateur Snapchat">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-between pt-6 space-y-3 sm:space-y-0">
+                <a href="{{ url_for('user_dashboard') }}" 
+                   class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Annuler
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Enregistrer les modifications
+                    <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Phone Numbers Management -->
+<script>
+    window.phoneCount = 1;
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('phone-numbers-container');
+    const addButton = document.getElementById('add-phone-btn');
+    const maxPhones = 4;
+
+    // Count existing phone fields
+    const existingPhoneFields = document.querySelectorAll('.phone-field');
+    phoneCount = existingPhoneFields.length;
+
+    const phoneTypes = {
+        2: { name: 'secondary', label: 'Secondaire' },
+        3: { name: 'third', label: 'Troisième' },
+        4: { name: 'fourth', label: 'Quatrième' }
+    };
+
+    function createPhoneField(index) {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'phone-field relative';
+
+        const phoneType = phoneTypes[index];
+
+        fieldDiv.innerHTML = `
+            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                <div class="flex-grow">
+                    <label for="phone_${phoneType.name}" class="block text-sm font-medium text-gray-700">
+                        ${phoneType.label} numéro de téléphone
+                    </label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input type="tel"
+                               id="phone_${phoneType.name}"
+                               name="phone_${phoneType.name}"
+                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Entrez votre ${phoneType.label.toLowerCase()} numéro de téléphone">
+                    </div>
+                </div>
+                <button type="button" class="remove-phone-btn mt-6 sm:mt-6 text-red-600 hover:text-red-800">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(fieldDiv);
+
+        // Add remove button handler
+        fieldDiv.querySelector('.remove-phone-btn').addEventListener('click', function() {
+            fieldDiv.remove();
+            phoneCount--;
+            addButton.style.display = 'inline-flex';
+        });
+    }
+
+    addButton.addEventListener('click', function() {
+        if (phoneCount < maxPhones) {
+            phoneCount++;
+            createPhoneField(phoneCount);
+
+            if (phoneCount >= maxPhones) {
+                addButton.style.display = 'none';
+            }
+        }
+    });
+
+    // Add remove handlers to existing phone fields
+    document.querySelectorAll('.remove-phone-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.phone-field').remove();
+            phoneCount--;
+            addButton.style.display = 'inline-flex';
+        });
+    });
+});
+</script>
+
+<!-- Image Preview Handler -->
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('preview-image');
+    const defaultPhoto = document.getElementById('default-photo');
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            if (preview) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+            if (defaultPhoto) {
+                defaultPhoto.classList.add('hidden');
+            }
+        }
+
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %} 

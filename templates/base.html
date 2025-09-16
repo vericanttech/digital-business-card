@@ -3,29 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Business Card</title>
+    <meta name="description" content="QR Pro Creator allows anyone to generate their personal QR code in just a few clicks.">
+    <meta name="keywords" content="QR code, personal QR code, digital business card, contact sharing, NFC cards">
+    <meta name="author" content="QR Pro Creator">
+    <meta property="og:title" content="Create a free personal QR code – QR Pro Creator">
+    <meta property="og:description" content="QR Pro Creator allows anyone to generate their personal QR code in just a few clicks.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Create a free personal QR code – QR Pro Creator">
+    <meta name="twitter:description" content="QR Pro Creator allows anyone to generate their personal QR code in just a few clicks.">
+    <title>{% block title %}Create a free personal QR code – QR Pro Creator{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+    <link rel="alternate icon" href="{{ url_for('static', filename='images/logo.svg') }}">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --brand-color: #F15A22;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fef7ee',
+                            100: '#fdedd6',
+                            200: '#fbd7ac',
+                            300: '#f8bb77',
+                            400: '#f59540',
+                            500: '#f2731a',
+                            600: '#e35a0f',
+                            700: '#bc4310',
+                            800: '#963614',
+                            900: '#792f14',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
         }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    {% block head %}{% endblock %}
+    
+    <style>
         body {
             font-family: 'Inter', sans-serif;
         }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #f2731a 0%, #e35a0f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
     {% block content %}{% endblock %}
-
-    <!-- Custom JavaScript -->
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <footer class="py-4 text-center text-gray-600 text-sm">
-        <p>© {{ now.year }} Tous droits réservés pour QR Pro Creator.</p>
+    
+    <!-- Modern Footer -->
+    <footer class="bg-white/80 backdrop-blur-sm border-t border-gray-200/50 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <div class="flex justify-center items-center mb-4">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="QR Pro Creator" class="h-8 w-8 mr-2">
+                    <span class="text-xl font-bold gradient-text">QR Pro Creator</span>
+                </div>
+                <p class="text-gray-600 text-sm">© {{ now.year }} Tous droits réservés pour QR Pro Creator.</p>
+                <p class="text-gray-500 text-xs mt-2">Créé avec ❤️ pour simplifier le partage de contacts</p>
+            </div>
+        </div>
     </footer>
+    
+    <!-- JavaScript personnalisé -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

@@ -129,6 +129,17 @@
                 </div>
             </div>
 
+            <!-- Review Link Section -->
+            <div class="mt-6">
+                <label for="review_link" class="block text-sm font-medium text-gray-700">Lien d'Avis</label>
+                <div class="mt-1">
+                    <input type="text" id="review_link" name="review_link"
+                           value="{{ card.review_link }}"
+                           placeholder="Ajoutez un lien pour les avis"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+
             <!-- Social Media Section -->
             <div class="space-y-4">
                 <h3 class="text-lg font-medium text-gray-900">Réseaux Sociaux (Optionnel)</h3>
@@ -192,7 +203,28 @@
                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     {% endif %}
+
+                    {% if card.youtube %}
+                    <div>
+                        <label for="youtube" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-youtube mr-2 text-red-600"></i>YouTube
+                        </label>
+                        <input type="text" id="youtube" name="youtube" value="{{ card.youtube }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    {% endif %}
+
+                    {% if card.tiktok %}
+                    <div>
+                        <label for="tiktok" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-tiktok mr-2 text-black"></i>TikTok
+                        </label>
+                        <input type="text" id="tiktok" name="tiktok" value="{{ card.tiktok }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    {% endif %}
                 </div>
+
 
                 <!-- Add Social Media Button -->
                 <button type="button" id="add-social-btn"

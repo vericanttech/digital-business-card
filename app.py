@@ -5,31 +5,29 @@ import qrcode
 from io import BytesIO
 import base64
 import os
-from models.user import db, Admin, BusinessCard, Order  # Remove User from import
+from models.user import db, Admin, BusinessCard, Order, User  # Add User import
 from flask_migrate import Migrate
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
+from auth import init_oauth, google_login, google_callback
 
 # Load environment variables
 load_dotenv()
 
-""""app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False"""
-
-load_dotenv()
-print("Database URL:", os.getenv('DATABASE_URL'))
-print("Secret Key:", os.getenv('FLASK_SECRET_KEY'))
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '23eea57342560ce4c7e0a2c9884c1714'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                                     'business_cards.db')
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/photos')
-app.static_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY') or 'your-secret-key-change-this-in-production'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Session configuration for persistent login
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)  # Keep logged in for 30 days
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Initialize OAuth
+init_oauth(app)
 
 @app.context_processor
 def inject_now():
@@ -40,6 +38,7 @@ def inject_now():
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.remember_cookie_duration = timedelta(days=30)  # Remember for 30 days
 db.init_app(app)
 
 migrate = Migrate(app, db)
@@ -52,7 +51,16 @@ def inject_user():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Admin.query.get(int(user_id))
+    # Try to load as Admin first, then as User
+    admin = Admin.query.get(int(user_id))
+    if admin:
+        return admin
+    
+    user = User.query.get(int(user_id))
+    if user:
+        return user
+    
+    return None
 
 
 @app.before_first_request
@@ -66,30 +74,223 @@ def create_tables():
         db.session.commit()
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+# Google OAuth routes
+@app.route('/auth/google')
+def auth_google():
+    return google_login()
 
+
+@app.route('/auth/google/callback')
+def auth_google_callback():
+    return google_callback()
+
+
+@app.route('/login_error')
+def login_error():
+    flash('An error occurred during login. Please try again.', 'error')
+    return redirect(url_for('index'))
+
+
+@app.route('/test_oauth')
+def test_oauth():
+    """Test route to check OAuth configuration"""
+    import os
+    from flask import url_for
+    
+    client_id = os.getenv('GOOGLE_CLIENT_ID')
+    client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+    redirect_uri = url_for('auth_google_callback', _external=True)
+    
+    return jsonify({
+        'client_id_set': bool(client_id),
+        'client_secret_set': bool(client_secret),
+        'client_id_length': len(client_id) if client_id else 0,
+        'client_secret_length': len(client_secret) if client_secret else 0,
+        'redirect_uri': redirect_uri,
+        'host_url': request.host_url
+    })
+
+
+@app.route('/complete_profile', methods=['GET', 'POST'])
+def complete_profile():
+    if not current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = Admin.query.filter_by(username=username).first()
+        try:
+            # Update user profile with form data
+            current_user.profession = request.form.get('profession')
+            # Require phone number
+            phone_submitted = (request.form.get('phone') or '').strip()
+            if not phone_submitted:
+                flash('Phone number is required.', 'error')
+                return render_template('complete_profile.html')
+            current_user.phone = phone_submitted
+            current_user.biography = request.form.get('biography')
+            current_user.linkedin = request.form.get('linkedin')
+            current_user.whatsapp = request.form.get('whatsapp')
+            current_user.instagram = request.form.get('instagram')
+            
+            db.session.commit()
+            flash('Profile completed successfully!', 'success')
+            
+            # Redirect based on admin status
+            if current_user.is_admin:
+                return redirect(url_for('dashboard'))
+            else:
+                return redirect(url_for('user_dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred while saving your profile.', 'error')
+    
+    return render_template('complete_profile.html')
 
-        if user and user.check_password(password):
-            login_user(user)
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid username or password')
 
-    return render_template('login.html')
+@app.route('/user_dashboard')
+@login_required
+def user_dashboard():
+    # Redirect only pure Admin model users to admin dashboard.
+    # User accounts with is_admin=True can still access their user dashboard.
+    if isinstance(current_user._get_current_object(), Admin):
+        return redirect(url_for('dashboard'))
+    
+    # Generate QR code for the user
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(f"{request.host_url}pro/{current_user.profile_slug}")
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Convert QR code to base64 for display
+    buffered = BytesIO()
+    qr_img.save(buffered)
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+    
+    return render_template('user_dashboard.html', qr_code_base64=qr_base64)
+
+
+@app.route('/pro/<profile_slug>')
+def public_profile(profile_slug):
+    user = User.query.filter_by(profile_slug=profile_slug).first_or_404()
+    
+    # Generate QR code for the profile
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(f"{request.host_url}pro/{profile_slug}")
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Convert QR code to base64 for display
+    buffered = BytesIO()
+    qr_img.save(buffered)
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+    
+    return render_template('public_profile.html', user=user, qr_code_base64=qr_base64)
+
+
+@app.route('/download_qr/<profile_slug>')
+def download_qr(profile_slug):
+    user = User.query.filter_by(profile_slug=profile_slug).first_or_404()
+    
+    # Generate QR code
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(f"{request.host_url}pro/{profile_slug}")
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Save to BytesIO
+    img_io = BytesIO()
+    qr_img.save(img_io, 'PNG')
+    img_io.seek(0)
+    
+    from flask import send_file
+    return send_file(img_io, mimetype='image/png', as_attachment=True, download_name=f'qr-{profile_slug}.png')
+
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if isinstance(current_user._get_current_object(), Admin):
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        try:
+            # Basic information
+            new_first_name = request.form.get('first_name', '').strip()
+            new_last_name = request.form.get('last_name', '').strip()
+            
+            # Update first and last names if they changed
+            name_changed = False
+            if new_first_name and new_first_name != current_user.first_name:
+                current_user.first_name = new_first_name
+                name_changed = True
+            if new_last_name and new_last_name != current_user.last_name:
+                current_user.last_name = new_last_name
+                name_changed = True
+            
+            # Update profile slug if name changed
+            if name_changed:
+                from auth import generate_profile_slug
+                current_user.profile_slug = generate_profile_slug(current_user.first_name, current_user.last_name)
+            
+            current_user.profession = request.form.get('profession')
+            current_user.biography = request.form.get('biography')
+            
+            # Phone numbers
+            current_user.phone = request.form.get('phone')
+            current_user.phone_secondary = request.form.get('phone_secondary')
+            current_user.phone_third = request.form.get('phone_third')
+            current_user.phone_fourth = request.form.get('phone_fourth')
+            
+            # Location information
+            current_user.address = request.form.get('address')
+            current_user.location = request.form.get('location')
+            
+            # Review link
+            current_user.review_link = request.form.get('review_link')
+            
+            # Social media links
+            current_user.linkedin = request.form.get('linkedin')
+            current_user.whatsapp = request.form.get('whatsapp')
+            current_user.instagram = request.form.get('instagram')
+            current_user.twitter = request.form.get('twitter')
+            current_user.snapchat = request.form.get('snapchat')
+            current_user.facebook = request.form.get('facebook')
+            current_user.youtube = request.form.get('youtube')
+            current_user.tiktok = request.form.get('tiktok')
+            
+            # Handle photo upload
+            photo = request.files.get('photo')
+            if photo and photo.filename:
+                # Create photos directory if it doesn't exist
+                os.makedirs('static/photos', exist_ok=True)
+                
+                # Generate unique filename
+                filename = f"user_{current_user.id}_{int(datetime.utcnow().timestamp())}_{photo.filename}"
+                photo_path = f"photos/{filename}"
+                
+                # Save the photo
+                photo.save(f"static/{photo_path}")
+                
+                # Update user's profile picture
+                current_user.profile_picture = photo_path
+            
+            db.session.commit()
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('user_dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred while updating your profile.', 'error')
+            print(f"Error updating profile: {str(e)}")
+    
+    return render_template('edit_profile.html')
 
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 
 @app.route('/dashboard')
@@ -122,7 +323,7 @@ def create_card():
                 phone_third=request.form.get('phone_third'),
                 phone_fourth=request.form.get('phone_fourth'),
                 email=request.form['email'],
-                address=request.form['address'],  # Add this line here
+                address=request.form['address'],
                 location=request.form['location'],
                 photo_path=photo_path,
                 # Social media fields
@@ -134,6 +335,7 @@ def create_card():
                 linkedin=request.form.get('linkedin'),
                 youtube=request.form.get('youtube'),
                 tiktok=request.form.get('tiktok'),
+                review_link=request.form.get('review_link'),  # New field
                 unique_id=unique_id
             )
 
@@ -185,16 +387,15 @@ def edit_card(unique_id):
             card.phone_third = request.form.get('phone_third')
             card.phone_fourth = request.form.get('phone_fourth')
             card.address = request.form['address']
+
             # Handle location
             new_location = request.form.get('location')
             if new_location:
                 card.location = new_location
-            # If no location provided and no existing location, set a default
             elif not card.location:
                 card.location = "Location not specified"
 
             # Handle social media fields
-
             card.whatsapp = request.form.get('whatsapp')
             card.instagram = request.form.get('instagram')
             card.facebook = request.form.get('facebook')
@@ -203,6 +404,9 @@ def edit_card(unique_id):
             card.snapchat = request.form.get('snapchat')
             card.youtube = request.form.get('youtube')
             card.tiktok = request.form.get('tiktok')
+
+            # Handle review link
+            card.review_link = request.form.get('review_link')  # New field
 
             # Handle photo upload if provided
             if 'photo' in request.files:
@@ -239,6 +443,7 @@ def edit_card(unique_id):
 
     # GET request - display the form
     return render_template('edit_card.html', card=card)
+
 
 
 @app.route('/delete_card/<unique_id>', methods=['POST'])
@@ -318,7 +523,11 @@ def order_form():
 @app.route('/')
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        # Redirect based on user type
+        if isinstance(current_user._get_current_object(), Admin):
+            return redirect(url_for('dashboard'))
+        else:
+            return redirect(url_for('user_dashboard'))
     return render_template('index.html')
 
 
@@ -414,6 +623,38 @@ def order_details(order_id):
         print(f"Error in order_details: {str(e)}")  # Debug print
         app.logger.error(f"Error in order_details: {str(e)}")  # Debug log
         return jsonify({'error': str(e)}), 500
+
+
+# Admin management routes
+@app.route('/admin/manage', methods=['GET', 'POST'])
+def admin_manage():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == 'Alaamin123':
+            # Get all users
+            users = User.query.all()
+            return render_template('admin_manage.html', users=users, authenticated=True)
+        else:
+            flash('Mot de passe incorrect!', 'error')
+            return render_template('admin_manage.html', users=[], authenticated=False)
+    
+    return render_template('admin_manage.html', users=[], authenticated=False)
+
+
+@app.route('/admin/toggle_admin/<int:user_id>', methods=['POST'])
+def toggle_admin(user_id):
+    password = request.form.get('password')
+    if password != 'Alaamin123':
+        flash('Mot de passe incorrect!', 'error')
+        return redirect(url_for('admin_manage'))
+    
+    user = User.query.get_or_404(user_id)
+    user.is_admin = not user.is_admin
+    db.session.commit()
+    
+    status = "admin" if user.is_admin else "utilisateur"
+    flash(f'{user.get_full_name()} est maintenant {status}!', 'success')
+    return redirect(url_for('admin_manage'))
 
 
 if __name__ == '__main__':
